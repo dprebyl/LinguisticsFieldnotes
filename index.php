@@ -21,12 +21,26 @@
 			
 			
 			function add() {
+				// Read inputs from user
 				var entry = [];
 				for (var i = 0; i < ENTRY_INPUTS.length; i++) {
 					entry[i] = document.getElementById(ENTRY_INPUTS[i]).value;
 				}
 				console.log(entry);
 				
+				// Add to local storage
+				var entries = JSON.parse(localStorage.getItem("entries"));
+				if (entries == null) entries = [];
+				entries.push(entry);
+				localStorage.setItem("entries", JSON.stringify(entries));
+				console.log(entries);
+				
+				// display in right column
+				createListEntry(entry);
+			}
+			
+			// Adds an element to the right column list
+			function createListEntry(entry) {
 				var listItem = document.createElement("li");
 				listItem.className = "list-group-item";
 				var text = document.createTextNode(entry[0] + " / " + entry[1]);
@@ -100,6 +114,7 @@
 				</div>
 				<div class="col-md-5">
 					<ul class="list-group" id="entry-list">
+						<!--
 						<li class="list-group-item">garen / stomach</li>
 						<li class="list-group-item">dal / bark</li>
 						<li class="list-group-item">it / dog</li>
@@ -118,6 +133,14 @@
 						<li class="list-group-item">First item</li>
 						<li class="list-group-item">Second item</li>
 						<li class="list-group-item">Third item</li>
+						-->
+						<script type="text/javascript">
+							var entries = JSON.parse(localStorage.getItem("entries"));
+							if (entries == null) entries = [];
+							for (var i = 0; i < entries.length; i++) {
+								createListEntry(entries[i]);
+							}
+						</script>
 					</ul>
 					<form class="form-horizontal">
 						<div class="form-group">
