@@ -18,7 +18,7 @@
 			}
 		</style>
 		<script type="text/javascript">
-			const GLOBAL_INPUTS = ["date", "name", "topic"]; // Apply to the whole session
+			const GLOBAL_INPUTS = ["date", "names", "topic"]; // Apply to the whole session
 			const ENTRY_INPUTS = ["foreign", "english", "comment"]; // Apply to each specific entry
 			var entries = [];
 			var editNum = 0;
@@ -123,6 +123,27 @@
 				saveEntries();
 				loadEntries(); // Much easier than trying to renumber
 			}
+			
+			// Ensure date, source, and topic are filled out, and there is at least one entry
+			function attemptSubmit() {
+				var good = entries.length > 0;
+				var data = {entries: entries};
+				for (var i = 0; i < GLOBAL_INPUTS.length; i++) {
+					var el = document.getElementById(GLOBAL_INPUTS[i]);
+					if (el.value == "") {
+						el.parentNode.classList.add("has-error");
+						good = false;
+					}
+					data[GLOBAL_INPUTS[i]] = el.value;
+				}
+				if (!good) { // User needs to input something
+					$("#error-modal").modal();
+				} else { // Submit
+					var el = document.getElementById("submission-data");
+					el.value = JSON.stringify(data);
+					el.parentNode.submit();
+				}
+			}
 		</script>
 	</head>
 	<body>
@@ -134,19 +155,19 @@
 						<div class="form-group">
 							<label class="control-label col-md-2" for="date">Date:</label>
 							<div class="col-md-10">
-								<input type="date" class="form-control" id="date">
+								<input type="date" class="form-control" id="date" oninput="this.parentNode.classList.remove('has-error')">
 							</div>
 						</div>
 						<div class="form-group">
 							<label class="control-label col-md-2" for="names">Source:</label>
 							<div class="col-md-10">
-								<input type="text" class="form-control" id="names" placeholder="Class elicitation (typed by John Gluckman)">
+								<input type="text" class="form-control" id="names" placeholder="Class elicitation (typed by John Gluckman)" oninput="this.parentNode.classList.remove('has-error')">
 							</div>
 						</div>
 						<div class="form-group">
 							<label class="control-label col-md-2" for="topic">Topic:</label>
 							<div class="col-md-10">
-								<input type="text" class="form-control" id="topic" placeholder="Swadesh list">
+								<input type="text" class="form-control" id="topic" placeholder="Swadesh list" oninput="this.parentNode.classList.remove('has-error')">
 							</div>
 						</div>
 						<hr>
@@ -212,5 +233,27 @@
 				</div>
 			</div>
 		</div>
+		
+		<!-- Modal -->
+		<div class="modal fade" id="error-modal" role="dialog">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal">&times;</button>
+							<h4 class="modal-title">Incomplete submission</h4>
+						</div>
+					<div class="modal-body">
+						<p>Please ensure you have entered a date, source, topic, and at least one entry.</p>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<form method="POST" action="submit.php" style="display:none">
+			<input type="hidden" name="data" id="submission-data">
+		</form>
 	</body>
 </html>
