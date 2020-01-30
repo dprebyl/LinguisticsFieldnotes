@@ -2,6 +2,7 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<title>Field notes entry</title>
 		<!-- Bootstrap -->
 		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous" media="all">
@@ -17,35 +18,110 @@
 			}
 		</style>
 		<script type="text/javascript">
-			const ENTRY_INPUTS = ["foreign", "english", "comment"];
+			const GLOBAL_INPUTS = ["date", "name", "topic"]; // Apply to the whole session
+			const ENTRY_INPUTS = ["foreign", "english", "comment"]; // Apply to each specific entry
+			var entries = [];
+			var editNum = 0;
 			
-			
-			function add() {
-				// Read inputs from user
-				var entry = [];
-				for (var i = 0; i < ENTRY_INPUTS.length; i++) {
-					entry[i] = document.getElementById(ENTRY_INPUTS[i]).value;
-				}
-				console.log(entry);
-				
-				// Add to local storage
-				var entries = JSON.parse(localStorage.getItem("entries"));
+			// Load and display entries from localStorage
+			function loadEntries() {
+				var entryList = document.getElementById("entry-list");
+				entryList.innerHTML = "";
+				entries = JSON.parse(localStorage.getItem("entries"));
 				if (entries == null) entries = [];
-				entries.push(entry);
+				for (var i = 0; i < entries.length; i++) {
+					entryList.appendChild(drawListEntry(entries[i], i));
+				}
+			}
+			
+			// Called whenever the user adds, edits, or deletes an entry
+			function saveEntries() {
 				localStorage.setItem("entries", JSON.stringify(entries));
-				console.log(entries);
-				
-				// display in right column
-				createListEntry(entry);
 			}
 			
 			// Adds an element to the right column list
-			function createListEntry(entry) {
-				var listItem = document.createElement("li");
+			function drawListEntry(entry, num) {
+				var listItem = document.createElement("a");
 				listItem.className = "list-group-item";
+				listItem.href = "#";
+				listItem.id = "entry" + num;
+				listItem.onclick = e => toggleEdit(listItem);
 				var text = document.createTextNode(entry[0] + " / " + entry[1]);
 				listItem.appendChild(text);
-				document.getElementById("entry-list").appendChild(listItem);
+				return listItem;
+			}
+			
+			// Return user's inputs an an array and clears the text boxes
+			function getUserEntry() {
+				var entry = [];
+				for (var i = 0; i < ENTRY_INPUTS.length; i++) {
+					entry[i] = document.getElementById(ENTRY_INPUTS[i]).value;
+					document.getElementById(ENTRY_INPUTS[i]).value = "";
+				}
+				return entry;
+			}
+			
+			// User adds a new entry to the list
+			function createEntry() {
+				// Read inputs from user and add to local storage
+				var entry = getUserEntry();
+				entries.push(entry);
+				saveEntries();
+
+				// display in right column
+				document.getElementById("entry-list").appendChild(
+					drawListEntry(entry, entries.length-1)
+				);
+			}
+			
+			// Enter/exit editing mode (as opposed to adding mode)
+			function toggleEdit(item) {
+				// Currently editing this entry - stop editing it (without saving)
+				if (item.classList.contains("active")) {
+					document.getElementById("editor").classList.remove("well");
+					document.getElementById("add-buttons").classList.remove("hidden");
+					document.getElementById("edit-buttons").classList.add("hidden");
+					item.classList.remove("active");
+					
+					for (var i = 0; i < ENTRY_INPUTS.length; i++) {
+						document.getElementById(ENTRY_INPUTS[i]).value = "";
+					}
+					
+				} else { // Open this entry for editing
+					document.getElementById("editor").classList.add("well");
+					document.getElementById("add-buttons").classList.add("hidden");
+					document.getElementById("edit-buttons").classList.remove("hidden");
+					
+					// Deselect any other entries
+					document.querySelectorAll("#entry-list a").forEach(el => el.classList.remove("active"));
+					item.classList.add("active");
+					
+					// Put text in editor
+					editNum = +item.id.substr(5);
+					for (var i = 0; i < ENTRY_INPUTS.length; i++) {
+						document.getElementById(ENTRY_INPUTS[i]).value = entries[editNum][i];
+					}
+				}
+			}
+			
+			// User saves changes to entry being edited
+			function saveEdit() {
+				entries[editNum] = getUserEntry();
+				saveEntries();
+				
+				var listItem = document.getElementById("entry" + editNum);
+				toggleEdit(listItem);
+				listItem.parentNode.replaceChild(drawListEntry(entries[editNum], editNum), listItem);
+			}
+			
+			// User deletes entry
+			function deleteEntry() {
+				var listItem = document.getElementById("entry" + editNum);
+				toggleEdit(listItem);
+				
+				entries.splice(editNum, 1);
+				saveEntries();
+				loadEntries(); // Much easier than trying to renumber
 			}
 		</script>
 	</head>
@@ -74,34 +150,44 @@
 							</div>
 						</div>
 						<hr>
-						<div class="form-group">
-							<label class="control-label col-md-2" for="foreign">Foreign:</label>
-							<div class="col-md-10">
-								<div class="input-group">
-									<input type="text" class="form-control" id="foreign">
-									<div class="input-group-btn">
-										<button type="button" class="btn btn-default">
-											<span class="glyphicon glyphicon-pencil"></span>
-										</button>
+						<div id="editor">
+							<div class="form-group">
+								<label class="control-label col-md-2" for="foreign">Foreign:</label>
+								<div class="col-md-10">
+									<div class="input-group">
+										<input type="text" class="form-control" id="foreign">
+										<div class="input-group-btn">
+											<button type="button" class="btn btn-default">
+												<span class="glyphicon glyphicon-pencil"></span>
+											</button>
+										</div>
 									</div>
 								</div>
 							</div>
-						</div>
-						<div class="form-group">
-							<label class="control-label col-md-2" for="english">English:</label>
-							<div class="col-md-10">
-								<input type="text" class="form-control" id="english">
+							<div class="form-group">
+								<label class="control-label col-md-2" for="english">English:</label>
+								<div class="col-md-10">
+									<input type="text" class="form-control" id="english">
+								</div>
 							</div>
-						</div>
-						<div class="form-group">
-						  <label class="control-label col-md-2" for="comment">Comments (optional):</label>
-						  <div class="col-md-10">
-							<textarea class="form-control" rows="3" id="comment" style="resize:vertical"></textarea>
-						  </div>
-						</div>
-						<div class="form-group">
-							<div class="col-md-2">
-								<button type="button" class="btn btn-success col-md-12" onclick="add()">Add</button>
+							<div class="form-group">
+							  <label class="control-label col-md-2" for="comment">Comments (optional):</label>
+							  <div class="col-md-10">
+								<textarea class="form-control" rows="3" id="comment" style="resize:vertical"></textarea>
+							  </div>
+							</div>
+							<div class="form-group" id="add-buttons">
+								<div class="col-md-2 pull-right">
+									<button type="button" class="btn btn-success col-md-12" onclick="createEntry()">Add</button>
+								</div>
+							</div>
+							<div class="form-group hidden" id="edit-buttons">
+								<div class="col-md-2">
+									<button type="button" class="btn btn-danger col-md-12" onclick="deleteEntry()">Delete</button>
+								</div>
+								<div class="col-md-2 pull-right">
+									<button type="button" class="btn btn-success col-md-12" onclick="saveEdit()">Save</button>
+								</div>
 							</div>
 						</div>
 					</form>
@@ -113,39 +199,13 @@
 					</div>
 				</div>
 				<div class="col-md-5">
-					<ul class="list-group" id="entry-list">
-						<!--
-						<li class="list-group-item">garen / stomach</li>
-						<li class="list-group-item">dal / bark</li>
-						<li class="list-group-item">it / dog</li>
-						<li class="list-group-item">First item</li>
-						<li class="list-group-item">This is an entry with a really long text to see if it can automatically put an elipses on the end of it. Wow is that really not enough text?</li>
-						<li class="list-group-item">Third item</li>
-						<li class="list-group-item">First item</li>
-						<li class="list-group-item active">This is how editing would look</li>
-						<li class="list-group-item">Third item</li>
-						<li class="list-group-item">First item</li>
-						<li class="list-group-item">Second item</li>
-						<li class="list-group-item">Third item</li>
-						<li class="list-group-item">First item</li>
-						<li class="list-group-item">Second item</li>
-						<li class="list-group-item">Third item</li>
-						<li class="list-group-item">First item</li>
-						<li class="list-group-item">Second item</li>
-						<li class="list-group-item">Third item</li>
-						-->
-						<script type="text/javascript">
-							var entries = JSON.parse(localStorage.getItem("entries"));
-							if (entries == null) entries = [];
-							for (var i = 0; i < entries.length; i++) {
-								createListEntry(entries[i]);
-							}
-						</script>
-					</ul>
+					<div class="list-group" id="entry-list">
+						<script type="text/javascript">loadEntries();</script>
+					</div>
 					<form class="form-horizontal">
 						<div class="form-group">
 							<div class="col-md-3 pull-right">
-								<button type="button" class="btn btn-success col-md-12">Submit</button>
+								<button type="button" class="btn btn-success col-md-12" onclick="attemptSubmit()">Submit</button>
 							</div>
 						</div>
 					</form>
