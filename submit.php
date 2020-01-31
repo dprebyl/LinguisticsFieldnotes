@@ -1,9 +1,6 @@
 <?php
-	// Require login
-	session_start();
-	if (!isset($_SESSION["approved"]) || $_SESSION["approved"] != true) {
-		header("Location: ./"); exit;
-	}
+	require("config.php");
+	requireLogin();
 
 	$FILE = "TurkmenFieldnotes-Spring2020.txt";
 
@@ -24,8 +21,11 @@
 		$output .= "\n";
 	}
 	
-	echo "<pre>$output</pre>";
-	
-	//file_put_contents($FILE, $output, FILE_APPEND | LOCK_EX);
+	//echo "<pre>$output</pre>";
+	file_put_contents(PROJECT_FILE, $output, FILE_APPEND | LOCK_EX);
 	header("Location: submission-received.php");
+	
+	if (PROJECT_FILE !== false) {
+		copy(PROJECT_FILE, BACKUP_DIR . "/" . date("Y-m-d_H.i.s")); // Create a backup
+	}
 ?>

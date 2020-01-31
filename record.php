@@ -1,9 +1,6 @@
 <?php
-	// Require login
-	session_start();
-	if (!isset($_SESSION["approved"]) || $_SESSION["approved"] != true) {
-		header("Location: ./"); exit;
-	}
+	require("config.php");
+	requireLogin();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -30,6 +27,12 @@
 			const ENTRY_INPUTS = ["foreign", "english", "comment"]; // Apply to each specific entry
 			var entries = [];
 			var editNum = 0;
+			
+			// Called when user types in date/source/topic, saves to local storage and removes error if present
+			function storeGlobal(el) {
+				el.parentNode.classList.remove('has-error');
+				localStorage.setItem(el.id, el.value);
+			}
 			
 			// Load and display entries from localStorage
 			function loadEntries() {
@@ -163,21 +166,24 @@
 						<div class="form-group">
 							<label class="control-label col-md-2" for="date">Date:</label>
 							<div class="col-md-10">
-								<input type="date" class="form-control" id="date" oninput="this.parentNode.classList.remove('has-error')">
+								<input type="date" class="form-control" id="date" oninput="storeGlobal(this)">
 							</div>
 						</div>
 						<div class="form-group">
 							<label class="control-label col-md-2" for="names">Source:</label>
 							<div class="col-md-10">
-								<input type="text" class="form-control" id="names" placeholder="Class elicitation (typed by John Gluckman)" oninput="this.parentNode.classList.remove('has-error')">
+								<input type="text" class="form-control" id="names" placeholder="Class elicitation (typed by John Gluckman)" oninput="storeGlobal(this)">
 							</div>
 						</div>
 						<div class="form-group">
 							<label class="control-label col-md-2" for="topic">Topic:</label>
 							<div class="col-md-10">
-								<input type="text" class="form-control" id="topic" placeholder="Swadesh list" oninput="this.parentNode.classList.remove('has-error')">
+								<input type="text" class="form-control" id="topic" placeholder="Swadesh list" oninput="storeGlobal(this)">
 							</div>
 						</div>
+						<script>
+							for (var i = 0; i < GLOBAL_INPUTS.length; i++) document.getElementById(GLOBAL_INPUTS[i]).value = localStorage.getItem(GLOBAL_INPUTS[i]);
+						</script>
 						<hr>
 						<div id="editor">
 							<div class="form-group">
@@ -223,7 +229,7 @@
 					<div class="panel-group">
 						<div class="panel panel-info">
 							<div class="panel-heading">Annotations</div>
-							<div class="panel-body">$MP$ is for "minimal pair"</div>
+							<div class="panel-body"><?php echo getAnnotations(); ?></div>
 						</div>
 					</div>
 				</div>

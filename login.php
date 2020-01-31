@@ -1,9 +1,10 @@
 <?php
+	require("config.php");
+	
 	session_start();
 	$id = $_POST["student-id"];
-	$approved = ($id == "123456");
 	
-	if ($approved) {
+	if (verifyId($id)) {
 		$_SESSION["approved"] = true;
 		header("Location: record.php");
 	} else {
