@@ -1,4 +1,10 @@
 <?php
+	// Require login
+	session_start();
+	if (!isset($_SESSION["approved"]) || $_SESSION["approved"] != true) {
+		header("Location: ./"); exit;
+	}
+
 	$FILE = "TurkmenFieldnotes-Spring2020.txt";
 
 	$data = json_decode($_POST["data"], true);	
