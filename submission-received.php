@@ -12,9 +12,10 @@
 	</head>
 	<body>
 		<div class="container">
-			<div class="jumbotron">
+			<div class="jumbotron" style="margin-top: 30px">
 				<h1>Submission Received</h1>
 				<p><a href="">View field notes</a></p>
+				<!-- TODO: Empty local storage -->
 			</div>
 		</div>
 	</body>

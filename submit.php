@@ -20,6 +20,6 @@
 	
 	echo "<pre>$output</pre>";
 	
-	file_put_contents($FILE, $output, FILE_APPEND | LOCK_EX);
+	//file_put_contents($FILE, $output, FILE_APPEND | LOCK_EX);
 	header("Location: submission-received.php");
 ?>
