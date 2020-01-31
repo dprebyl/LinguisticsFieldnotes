@@ -26,6 +26,6 @@
 	header("Location: submission-received.php");
 	
 	if (PROJECT_FILE !== false) {
-		copy(PROJECT_FILE, BACKUP_DIR . "/" . date("Y-m-d_H.i.s")); // Create a backup
+		copy(PROJECT_FILE, BACKUP_DIR . "/" . date("Y-m-d_H.i.s") . ".txt"); // Create a backup
 	}
 ?>

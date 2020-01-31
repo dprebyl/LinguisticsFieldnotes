@@ -26,7 +26,7 @@
 			const GLOBAL_INPUTS = ["date", "names", "topic"]; // Apply to the whole session
 			const ENTRY_INPUTS = ["foreign", "english", "comment"]; // Apply to each specific entry
 			var entries = [];
-			var editNum = 0;
+			var editNum = -1;
 			
 			// Called when user types in date/source/topic, saves to local storage and removes error if present
 			function storeGlobal(el) {
@@ -93,6 +93,7 @@
 					document.getElementById("add-buttons").classList.remove("hidden");
 					document.getElementById("edit-buttons").classList.add("hidden");
 					item.classList.remove("active");
+					editNum = -1;
 					
 					for (var i = 0; i < ENTRY_INPUTS.length; i++) {
 						document.getElementById(ENTRY_INPUTS[i]).value = "";
@@ -121,8 +122,8 @@
 				saveEntries();
 				
 				var listItem = document.getElementById("entry" + editNum);
-				toggleEdit(listItem);
 				listItem.parentNode.replaceChild(drawListEntry(entries[editNum], editNum), listItem);
+				toggleEdit(listItem);
 			}
 			
 			// User deletes entry
@@ -155,6 +156,20 @@
 					el.parentNode.submit();
 				}
 			}
+			
+			// When users presses enter key within form, add/save changes and refocus first input
+			function enter() {
+				if (editNum == -1) createEntry();
+				else saveEdit();
+				document.getElementById(ENTRY_INPUTS[0]).focus();
+				document.getElementById(ENTRY_INPUTS[0]).select();
+				return false; // Prevents form from being submitted
+			}
+			
+			// For the comments textarea
+			function checkEnter(e) {
+				if ((e.keyCode ? e.keyCode : e.which) == 13) enter();
+			}
 		</script>
 	</head>
 	<body>
@@ -162,7 +177,8 @@
 			<div class="row">
 				<div class="col-md-7">
 					<h1>Field note entry</h1>
-					<form class="form-horizontal">
+					<form class="form-horizontal" onsubmit="enter()" action="javascript:void(0)">
+						<input type="submit" class="hidden">
 						<div class="form-group">
 							<label class="control-label col-md-2" for="date">Date:</label>
 							<div class="col-md-10">
@@ -192,7 +208,7 @@
 									<div class="input-group">
 										<input type="text" class="form-control" id="foreign">
 										<div class="input-group-btn">
-											<button type="button" class="btn btn-default">
+											<button type="button" class="btn btn-default" tabindex="-1">
 												<span class="glyphicon glyphicon-pencil"></span>
 											</button>
 										</div>
@@ -208,7 +224,7 @@
 							<div class="form-group">
 							  <label class="control-label col-md-2" for="comment">Comments (optional):</label>
 							  <div class="col-md-10">
-								<textarea class="form-control" rows="3" id="comment" style="resize:vertical"></textarea>
+								<textarea class="form-control" rows="3" id="comment" style="resize:vertical" onkeypress="checkEnter(event)"></textarea>
 							  </div>
 							</div>
 							<div class="form-group" id="add-buttons">
@@ -232,6 +248,7 @@
 							<div class="panel-body"><?php echo getAnnotations(); ?></div>
 						</div>
 					</div>
+					<p>Tip: For fast entry, press tab to move between textboxes and enter to add/save the current entry.</p>
 				</div>
 				<div class="col-md-5">
 					<div class="list-group" id="entry-list">

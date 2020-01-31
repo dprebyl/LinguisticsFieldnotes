@@ -34,9 +34,4 @@
 		}
 		return $lines;
 	}
-	
-	// Ensures line is not empty (only whitespace) or begins with a # (comment)
-	function validLine($line) {
-		return !ctype_space($line) && $line[0] != "#";
-	}
 ?>
