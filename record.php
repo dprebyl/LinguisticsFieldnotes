@@ -21,6 +21,68 @@
 				text-overflow: ellipsis; 
 				white-space: nowrap;
 			}
+			#ipa-spacer {
+				height: 240px;
+			}
+			#ipa {
+				position: fixed;
+				left: 0;
+				bottom: 0;
+				width: 100%;
+				background: white;
+				border-top: 1px solid #ddd;
+				z-index: 1000;
+				white-space: nowrap;
+				overflow-x: auto;
+				text-align: center;
+				line-height: 16px;
+			}
+			#consonants, #vowels {
+				display: inline-block;
+			}
+			#ipa table {
+				margin-bottom: 2px;
+			}
+			#ipa table th, #ipa table td {
+				padding: 0 4px 0 4px;
+				border: 1px solid black;
+				line-height: normal;
+				min-width: 24px;
+			}
+			#ipa table th {
+				text-align: right;
+			}
+			#ipa table tr:nth-of-type(1) th {
+				line-height: 16px;
+				text-align: center;
+			}
+			#ipa table td {
+				font-size: 20px;
+				text-align: center;
+			}
+			#ipa .typable:hover {
+				background: yellow;
+				cursor: pointer;
+			}
+			#ipa .gray {
+				background: gray;
+			}
+			#vowels {
+				position: relative;
+				background-image: url(vowels.svg);
+				background-size: contain;
+				width: 357px;
+				height: 250px;
+				margin: -20px 0 0 -37px;
+			}
+			.vowel {
+				position: absolute;
+				border: 1px solid black;
+				font-size: 20px;
+				line-height: 20px;
+				width: 20px;
+				text-align: center;
+			}
 		</style>
 		<script type="text/javascript">
 			const GLOBAL_INPUTS = ["date", "names", "topic"]; // Apply to the whole session
@@ -129,9 +191,10 @@
 			// User deletes entry
 			function deleteEntry() {
 				var listItem = document.getElementById("entry" + editNum);
-				toggleEdit(listItem);
 				
 				entries.splice(editNum, 1);
+				toggleEdit(listItem);
+				
 				saveEntries();
 				loadEntries(); // Much easier than trying to renumber
 			}
@@ -162,13 +225,23 @@
 				if (editNum == -1) createEntry();
 				else saveEdit();
 				document.getElementById(ENTRY_INPUTS[0]).focus();
-				document.getElementById(ENTRY_INPUTS[0]).select();
 				return false; // Prevents form from being submitted
 			}
 			
 			// For the comments textarea
 			function checkEnter(e) {
 				if ((e.keyCode ? e.keyCode : e.which) == 13) enter();
+			}
+			
+			function toggleIpa() {
+				document.getElementById("ipa-spacer").classList.toggle("hidden");
+			}
+			
+			// IPA keyboard
+			function type(el) { 
+				var foreign = document.getElementById("foreign");
+				foreign.value += el.innerText;
+				foreign.focus();
 			}
 		</script>
 	</head>
@@ -208,7 +281,7 @@
 									<div class="input-group">
 										<input type="text" class="form-control" id="foreign">
 										<div class="input-group-btn">
-											<button type="button" class="btn btn-default" tabindex="-1">
+											<button type="button" class="btn btn-default" tabindex="-1" title="Enter IPA symbols" onclick="toggleIpa()">
 												<span class="glyphicon glyphicon-pencil"></span>
 											</button>
 										</div>
@@ -265,7 +338,65 @@
 			</div>
 		</div>
 		
-		<!-- Modal -->
+		<!--- IPA input -->
+		<div class="hidden" id="ipa-spacer">
+			<div id="ipa">
+				<!--<ul class="nav nav-pills">
+					<li class="active"><a href="#consonants">Pulmonic consonants</a></li>
+					<li><a href="#vowels">Vowels</a></li>
+					<li><a href="javascript:void(0)">Non-pulmonic consonants</a></li>
+					<li><a href="javascript:void(0)">Other</a></li>
+				</ul>-->
+				<a name="consonants"></a>
+				<table id="consonants">
+					<?php
+						$cols = ["Bilabial", "Labio-<br>dental", "Dental", "Alveolar", "Post-<br>alveolar", "Retroflex", "Palatal", "Velar", "Uvular", "Pharyn-<br>geal", "Glottal"];
+						$rows = [
+							"Plosive" => ["p", "b", "", "", "", "", "t", "d", "", "", "ʈ", "ɖ", "c", "ɟ", "k", "ɡ", "q", "ɢ", "", "_", "ʔ", "_"],
+							"Nasal" => ["", "m", "", "ɱ", "", "", "", "n", "", "", "", "ɳ", "", "ɲ", "", "ŋ", "", "ɴ", "_", "_", "_", "_"],
+							"Trill" => ["", "ʙ", "", "", "", "", "", "r", "", "", "", "", "", "", "_", "_", "", "ʀ", "", "", "_", "_"],
+							"Tap or Flap" => ["", "", "", "ⱱ", "", "", "", "ɾ", "", "", "", "ɽ", "", "", "_", "_", "", "", "", "", "_", "_"],
+							"Fricative" => ["ɸ", "β", "f", "v", "θ", "ð", "s", "z", "ʃ", "ʒ", "ʂ", "ʐ", "ç", "ʝ", "x", "ɣ", "χ", "ʁ", "ħ", "ʕ", "h", "ɦ"],
+							"Lateral fricative" => ["_", "_", "_", "_", "", "", "ɬ", "ɮ", "", "", "", "", "", "", "", "", "", "", "_", "_", "_", "_"],
+							"Approximant" => ["", "", "", "ʋ", "", "", "", "ɹ", "", "", "", "ɻ", "", "j", "", "ɰ", "", "", "", "", "_", "_"],
+							"Lateral approx." => ["_", "_", "_", "_", "", "", "", "l", "", "", "", "ɭ", "", "ʎ", "", "ʟ", "", "", "_", "_", "_", "_"],
+						];
+						echo "<tr><th></th>";
+						foreach ($cols as $col) echo "<th colspan=2>$col</th>";
+						echo "</tr>";
+						foreach ($rows as $row => $chars) {
+							echo "<tr><th>$row</th>";
+							foreach ($chars as $char) {
+								if ($char == "") echo "<td></td>";
+								elseif ($char == "_") echo '<td class="gray"></td>';
+								else echo '<td class="typable" onclick="type(this)">'.$char."</td>";
+							}
+						}
+					?>
+				</table>
+				<a name="vowels"></a>
+				<div id="vowels">
+					<?php
+						$vowelRows = [
+							10 => [12 => "i", 22 => "y", 49 => "ɨ", 58 => "ʉ", 85 => "ɯ", 95 => "u"],
+							22 => [30 => "ɪ", 37 => "ʏ", 78 => "ʊ"],
+							36 => [24 => "e", 34 => "ø", 55 => "ɘ", 64 => "ɵ", 85 => "ɤ", 95 => "o"],
+							49 => [62 => "ə"],
+							62 => [36 => "ɛ", 46 => "œ", 61 => "ɜ", 70=> "ɞ", 85 => "ʌ", 95 => "ɔ"],
+							75 => [40 => "æ", 67 => "ɐ"],
+							88 => [49 => "a", 59 => "ɶ", 85 => "ɑ", 95 => "ɒ"],
+						];
+						foreach ($vowelRows as $y => $vowelRow) {
+							foreach ($vowelRow as $x => $vowel) {
+								echo '<div class="vowel typable" style="top:'.$y.'%;left:'.$x.'%;" onclick="type(this)">'.$vowel."</div>";
+							}
+						}
+					?>
+				</div>
+			</div>
+		</div>
+		
+		<!-- Modal for error -->
 		<div class="modal fade" id="error-modal" role="dialog">
 			<div class="modal-dialog">
 				<div class="modal-content">
@@ -283,6 +414,7 @@
 			</div>
 		</div>
 		
+		<!-- Hidden form used to submit data -->
 		<form method="POST" action="submit.php" style="display:none">
 			<input type="hidden" name="data" id="submission-data">
 		</form>
