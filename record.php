@@ -46,7 +46,6 @@
 			#ipa table th, #ipa table td {
 				padding: 0 4px 0 4px;
 				border: 1px solid black;
-				line-height: normal;
 				min-width: 24px;
 			}
 			#ipa table th {
@@ -59,6 +58,7 @@
 			#ipa table td {
 				font-size: 20px;
 				text-align: center;
+				height: 24px;
 			}
 			#ipa .typable:hover {
 				background: yellow;
@@ -116,7 +116,7 @@
 			function drawListEntry(entry, num) {
 				var listItem = document.createElement("a");
 				listItem.className = "list-group-item";
-				listItem.href = "#";
+				listItem.href = "javascript:void(0)";
 				listItem.id = "entry" + num;
 				listItem.onclick = e => toggleEdit(listItem);
 				var text = document.createTextNode(entry[0] + " / " + entry[1]);
@@ -350,6 +350,7 @@
 				<a name="consonants"></a>
 				<table id="consonants">
 					<?php
+						$ipa = implode("", readConfigFile("IPA"));
 						$cols = ["Bilabial", "Labio-<br>dental", "Dental", "Alveolar", "Post-<br>alveolar", "Retroflex", "Palatal", "Velar", "Uvular", "Pharyn-<br>geal", "Glottal"];
 						$rows = [
 							"Plosive" => ["p", "b", "", "", "", "", "t", "d", "", "", "ʈ", "ɖ", "c", "ɟ", "k", "ɡ", "q", "ɢ", "", "_", "ʔ", "_"],
@@ -367,7 +368,7 @@
 						foreach ($rows as $row => $chars) {
 							echo "<tr><th>$row</th>";
 							foreach ($chars as $char) {
-								if ($char == "") echo "<td></td>";
+								if ($char == "" || strpos($ipa, $char) === false) echo "<td></td>";
 								elseif ($char == "_") echo '<td class="gray"></td>';
 								else echo '<td class="typable" onclick="type(this)">'.$char."</td>";
 							}
@@ -388,7 +389,8 @@
 						];
 						foreach ($vowelRows as $y => $vowelRow) {
 							foreach ($vowelRow as $x => $vowel) {
-								echo '<div class="vowel typable" style="top:'.$y.'%;left:'.$x.'%;" onclick="type(this)">'.$vowel."</div>";
+								if (strpos($ipa, $vowel) !== false)
+									echo '<div class="vowel typable" style="top:'.$y.'%;left:'.$x.'%;" onclick="type(this)">'.$vowel."</div>";
 							}
 						}
 					?>
