@@ -71,13 +71,14 @@
 				position: relative;
 				background-image: url(vowels.svg);
 				background-size: contain;
-				width: 357px;
-				height: 250px;
-				margin: -20px 0 0 -37px;
+				width: 305px;
+				height: 225px;
 			}
 			.vowel {
 				position: absolute;
 				border: 1px solid black;
+				border-radius: 2px;
+				background: white;
 				font-size: 20px;
 				line-height: 20px;
 				width: 20px;
@@ -351,7 +352,7 @@
 				<table id="consonants">
 					<?php
 						$ipa = implode("", readConfigFile("IPA"));
-						$cols = ["Bilabial", "Labio-<br>dental", "Dental", "Alveolar", "Post-<br>alveolar", "Retroflex", "Palatal", "Velar", "Uvular", "Pharyn-<br>geal", "Glottal"];
+						$cols = ["Bilabial", "Labio-<br>dental", "Dental", "Alveolar", "Post-<br>alveolar", "Retro-<br>flex", "Palatal", "Velar", "Uvular", "Pharyn-<br>geal", "Glottal"];
 						$rows = [
 							"Plosive" => ["p", "b", "", "", "", "", "t", "d", "", "", "ʈ", "ɖ", "c", "ɟ", "k", "ɡ", "q", "ɢ", "", "_", "ʔ", "_"],
 							"Nasal" => ["", "m", "", "ɱ", "", "", "", "n", "", "", "", "ɳ", "", "ɲ", "", "ŋ", "", "ɴ", "_", "_", "_", "_"],
@@ -368,8 +369,8 @@
 						foreach ($rows as $row => $chars) {
 							echo "<tr><th>$row</th>";
 							foreach ($chars as $char) {
-								if ($char == "" || strpos($ipa, $char) === false) echo "<td></td>";
-								elseif ($char == "_") echo '<td class="gray"></td>';
+								if ($char == "_") echo '<td class="gray"></td>';
+								elseif ($char == "" || strpos($ipa, $char) === false) echo "<td></td>";
 								else echo '<td class="typable" onclick="type(this)">'.$char."</td>";
 							}
 						}
@@ -379,13 +380,13 @@
 				<div id="vowels">
 					<?php
 						$vowelRows = [
-							10 => [12 => "i", 22 => "y", 49 => "ɨ", 58 => "ʉ", 85 => "ɯ", 95 => "u"],
-							22 => [30 => "ɪ", 37 => "ʏ", 78 => "ʊ"],
-							36 => [24 => "e", 34 => "ø", 55 => "ɘ", 64 => "ɵ", 85 => "ɤ", 95 => "o"],
-							49 => [62 => "ə"],
-							62 => [36 => "ɛ", 46 => "œ", 61 => "ɜ", 70=> "ɞ", 85 => "ʌ", 95 => "ɔ"],
-							75 => [40 => "æ", 67 => "ɐ"],
-							88 => [49 => "a", 59 => "ɶ", 85 => "ɑ", 95 => "ɒ"],
+							4 => [1 => "i", 10 => "y", 41 => "ɨ", 50 => "ʉ", 81 => "ɯ", 90 => "u"],
+							18 => [23 => "ɪ", 30 => "ʏ", 71 => "ʊ"],
+							32 => [14 => "e", 24 => "ø", 48 => "ɘ", 57 => "ɵ", 81 => "ɤ", 90 => "o"],
+							45 => [55 => "ə"],
+							59 => [27 => "ɛ", 37 => "œ", 54 => "ɜ", 64 => "ɞ", 81 => "ʌ", 90 => "ɔ"],
+							73 => [34 => "æ", 62 => "ɐ"],
+							87 => [41 => "a", 51 => "ɶ", 81 => "ɑ", 90 => "ɒ"],
 						];
 						foreach ($vowelRows as $y => $vowelRow) {
 							foreach ($vowelRow as $x => $vowel) {
