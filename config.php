@@ -32,6 +32,6 @@
 				$lines[$i] = str_replace(["\n", "\t", "\r"], '', $line); 
 			}
 		}
-		return $lines;
+		return array_values($lines);
 	}
 ?>

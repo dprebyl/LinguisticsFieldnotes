@@ -26,7 +26,7 @@
 		<div class="container text-center">
 			<div class="panel panel-default">
 				<div class="panel-body">
-					<h1>Field note entry login</h1>
+					<h1>Fieldnotes login</h1>
 					<form class="form-inline" method="POST" action="login.php">
 						<div class="form-group">
 							<label class="control-label" for="student-id">Student ID:</label>

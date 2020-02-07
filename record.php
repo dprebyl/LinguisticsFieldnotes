@@ -15,8 +15,8 @@
 		<script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script>
 		
 		<style type="text/css">
-			.list-group { margin-top: 15px; }
-			.list-group-item {
+			.top-spacing { margin-top: 15px; }
+			.list-group-item > div > div {
 				overflow: hidden; 
 				text-overflow: ellipsis; 
 				white-space: nowrap;
@@ -120,8 +120,8 @@
 				listItem.href = "javascript:void(0)";
 				listItem.id = "entry" + num;
 				listItem.onclick = e => toggleEdit(listItem);
-				var text = document.createTextNode(entry[0] + " / " + entry[1]);
-				listItem.appendChild(text);
+				//listItem.appendChild(document.createTextNode(entry[0] + " | " + entry[1]));
+				listItem.innerHTML = '<div class="row"><div class="col-sm-6">' + entry[0] + '</div><div class="col-sm-6">' + entry[1] + '</div></div>';
 				return listItem;
 			}
 			
@@ -229,17 +229,18 @@
 				return false; // Prevents form from being submitted
 			}
 			
-			// For the comments textarea
+			// For the comments textarea only
 			function checkEnter(e) {
 				if ((e.keyCode ? e.keyCode : e.which) == 13) enter();
 			}
 			
-			function toggleIpa() {
+			function toggleIpa(btn) {
 				document.getElementById("ipa-spacer").classList.toggle("hidden");
+				btn.classList.toggle("btn-info");
 			}
 			
 			// IPA keyboard
-			function type(el) { 
+			function type(el) {
 				var foreign = document.getElementById("foreign");
 				foreign.value += el.innerText;
 				foreign.focus();
@@ -249,10 +250,10 @@
 	<body>
 		<div class="container-fluid">
 			<div class="row">
-				<div class="col-md-7">
-					<h1>Field note entry</h1>
+				<div class="col-md-7 top-spacing">
+					<!--h1>Field note entry</h1-->
 					<form class="form-horizontal" onsubmit="enter()" action="javascript:void(0)">
-						<input type="submit" class="hidden">
+						<input type="submit" class="hidden"><!-- Required for enter to submit form -->
 						<div class="form-group">
 							<label class="control-label col-md-2" for="date">Date:</label>
 							<div class="col-md-10">
@@ -277,12 +278,12 @@
 						<hr>
 						<div id="editor">
 							<div class="form-group">
-								<label class="control-label col-md-2" for="foreign">Foreign:</label>
+								<label class="control-label col-md-2" for="foreign"><?=readConfigFile("LanguageName")[0]?>:</label>
 								<div class="col-md-10">
 									<div class="input-group">
 										<input type="text" class="form-control" id="foreign">
 										<div class="input-group-btn">
-											<button type="button" class="btn btn-default" tabindex="-1" title="Enter IPA symbols" onclick="toggleIpa()">
+											<button type="button" class="btn btn-default" tabindex="-1" title="Enter IPA symbols" onclick="toggleIpa(this)">
 												<span class="glyphicon glyphicon-pencil"></span>
 											</button>
 										</div>
@@ -290,7 +291,7 @@
 								</div>
 							</div>
 							<div class="form-group">
-								<label class="control-label col-md-2" for="english">English:</label>
+								<label class="control-label col-md-2" for="english">Translation:</label>
 								<div class="col-md-10">
 									<input type="text" class="form-control" id="english">
 								</div>
@@ -319,12 +320,12 @@
 					<div class="panel-group">
 						<div class="panel panel-info">
 							<div class="panel-heading">Annotations</div>
-							<div class="panel-body"><?php echo getAnnotations(); ?></div>
+							<div class="panel-body"><?=getAnnotations()?></div>
 						</div>
 					</div>
 					<p>Tip: For fast entry, press tab to move between textboxes and enter to add/save the current entry.</p>
 				</div>
-				<div class="col-md-5">
+				<div class="col-md-5 top-spacing">
 					<div class="list-group" id="entry-list">
 						<script type="text/javascript">loadEntries();</script>
 					</div>
