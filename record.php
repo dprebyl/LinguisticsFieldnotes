@@ -22,20 +22,29 @@
 				white-space: nowrap;
 			}
 			#ipa-spacer {
-				height: 240px;
+				height: 270px;
 			}
 			#ipa {
 				position: fixed;
 				left: 0;
 				bottom: 0;
 				width: 100%;
-				background: white;
-				border-top: 1px solid #ddd;
 				z-index: 1000;
 				white-space: nowrap;
 				overflow-x: auto;
 				text-align: center;
 				line-height: 16px;
+			}
+			#ipa .nav-tabs li:first-child {
+				margin-left: 10px;
+			}
+			#ipa .nav-tabs > li:not(.active) > a {
+				background: #ddd;
+			}
+			#ipa .tab-content {
+				background: white;
+				height: 235px;
+				overflow-y: hidden;
 			}
 			#consonants, #vowels {
 				display: inline-block;
@@ -51,11 +60,11 @@
 			#ipa table th {
 				text-align: right;
 			}
-			#ipa table tr:nth-of-type(1) th {
+			#ipa table thead th {
 				line-height: 16px;
 				text-align: center;
 			}
-			#ipa table td {
+			#ipa table td.typable {
 				font-size: 20px;
 				text-align: center;
 				height: 24px;
@@ -74,15 +83,17 @@
 				width: 305px;
 				height: 225px;
 			}
-			.vowel {
-				position: absolute;
+			div.typable {
 				border: 1px solid black;
 				border-radius: 2px;
-				background: white;
 				font-size: 20px;
 				line-height: 20px;
 				width: 20px;
 				text-align: center;
+			}
+			.vowel {
+				position: absolute;
+				background: white;
 			}
 		</style>
 		<script type="text/javascript">
@@ -90,6 +101,8 @@
 			const ENTRY_INPUTS = ["foreign", "english", "comment"]; // Apply to each specific entry
 			var entries = [];
 			var editNum = -1;
+			
+			// === Saving/loading entries =====================================
 			
 			// Called when user types in date/source/topic, saves to local storage and removes error if present
 			function storeGlobal(el) {
@@ -124,6 +137,8 @@
 				listItem.innerHTML = '<div class="row"><div class="col-sm-6">' + entry[0] + '</div><div class="col-sm-6">' + entry[1] + '</div></div>';
 				return listItem;
 			}
+			
+			// === User creating/editing entries ==============================
 			
 			// Return user's inputs an an array and clears the text boxes
 			function getUserEntry() {
@@ -200,6 +215,16 @@
 				loadEntries(); // Much easier than trying to renumber
 			}
 			
+			// When users presses enter key within form, add/save changes and refocus first input
+			function enter() {
+				if (editNum == -1) createEntry();
+				else saveEdit();
+				document.getElementById(ENTRY_INPUTS[0]).focus();
+				return false; // Prevents form from being submitted
+			}
+			
+			// === User submitting ============================================
+			
 			// Ensure date, source, and topic are filled out, and there is at least one entry
 			function attemptSubmit() {
 				var good = entries.length > 0;
@@ -221,12 +246,12 @@
 				}
 			}
 			
-			// When users presses enter key within form, add/save changes and refocus first input
-			function enter() {
-				if (editNum == -1) createEntry();
-				else saveEdit();
-				document.getElementById(ENTRY_INPUTS[0]).focus();
-				return false; // Prevents form from being submitted
+			// === IPA Input ==================================================
+			
+			var ipaElement = undefined;
+			
+			function setIpaInput(el) {
+				ipaElement = el;
 			}
 			
 			// For the comments textarea only
@@ -239,11 +264,15 @@
 				btn.classList.toggle("btn-info");
 			}
 			
-			// IPA keyboard
+			// When a button is pressed on the IPA input
 			function type(el) {
-				var foreign = document.getElementById("foreign");
-				foreign.value += el.innerText;
-				foreign.focus();
+				typeRaw(el.innerText);
+			}
+			
+			function typeRaw(text) {
+				if (ipaElement == undefined) ipaElement = document.getElementById("foreign");
+				ipaElement.value += text;
+				ipaElement.focus();
 			}
 		</script>
 	</head>
@@ -251,7 +280,6 @@
 		<div class="container-fluid">
 			<div class="row">
 				<div class="col-md-7 top-spacing">
-					<!--h1>Field note entry</h1-->
 					<form class="form-horizontal" onsubmit="enter()" action="javascript:void(0)">
 						<input type="submit" class="hidden"><!-- Required for enter to submit form -->
 						<div class="form-group">
@@ -281,7 +309,7 @@
 								<label class="control-label col-md-2" for="foreign"><?=readConfigFile("LanguageName")[0]?>:</label>
 								<div class="col-md-10">
 									<div class="input-group">
-										<input type="text" class="form-control" id="foreign">
+										<input type="text" class="form-control" id="foreign" onfocus="setIpaInput(this)">
 										<div class="input-group-btn">
 											<button type="button" class="btn btn-default" tabindex="-1" title="Enter IPA symbols" onclick="toggleIpa(this)">
 												<span class="glyphicon glyphicon-pencil"></span>
@@ -299,7 +327,7 @@
 							<div class="form-group">
 							  <label class="control-label col-md-2" for="comment">Comments (optional):</label>
 							  <div class="col-md-10">
-								<textarea class="form-control" rows="3" id="comment" style="resize:vertical" onkeypress="checkEnter(event)"></textarea>
+								<textarea class="form-control" rows="3" id="comment" style="resize:vertical" onkeypress="checkEnter(event)" onfocus="setIpaInput(this)"></textarea>
 							  </div>
 							</div>
 							<div class="form-group" id="add-buttons">
@@ -343,59 +371,153 @@
 		<!--- IPA input -->
 		<div class="hidden" id="ipa-spacer">
 			<div id="ipa">
-				<ul class="nav nav-pills">
-					<li class="active"><a href="#consonants">Consonants/Vowels</a></li>
-					<li><a href="#vowels">Diacritics</a></li>
-					<li><a href="javascript:void(0)">Tones/Accents</a></li>
-					<li><a href="javascript:void(0)">Other</a></li>
+				<ul class="nav nav-tabs">
+					<li class="active"><a data-toggle="tab" href="#consonants-vowels">Consonants/Vowels</a></li>
+					<li><a data-toggle="tab" href="#diacritics">Diacritics</a></li>
+					<li><a data-toggle="tab" href="#tones-accents">Tones/Accents</a></li>
+					<li><a data-toggle="tab" href="#other">Other</a></li>
 				</ul>
-				<a name="consonants"></a>
-				<table id="consonants">
-					<?php
-						$ipa = implode("", readConfigFile("IPA"));
-						$cols = ["Bilabial", "Labio-<br>dental", "Dental", "Alveolar", "Post-<br>alveolar", "Retro-<br>flex", "Palatal", "Velar", "Uvular", "Pharyn-<br>geal", "Glottal"];
-						$rows = [
-							"Plosive" => ["p", "b", "", "", "", "", "t", "d", "", "", "ʈ", "ɖ", "c", "ɟ", "k", "ɡ", "q", "ɢ", "", "_", "ʔ", "_"],
-							"Nasal" => ["", "m", "", "ɱ", "", "", "", "n", "", "", "", "ɳ", "", "ɲ", "", "ŋ", "", "ɴ", "_", "_", "_", "_"],
-							"Trill" => ["", "ʙ", "", "", "", "", "", "r", "", "", "", "", "", "", "_", "_", "", "ʀ", "", "", "_", "_"],
-							"Tap or Flap" => ["", "", "", "ⱱ", "", "", "", "ɾ", "", "", "", "ɽ", "", "", "_", "_", "", "", "", "", "_", "_"],
-							"Fricative" => ["ɸ", "β", "f", "v", "θ", "ð", "s", "z", "ʃ", "ʒ", "ʂ", "ʐ", "ç", "ʝ", "x", "ɣ", "χ", "ʁ", "ħ", "ʕ", "h", "ɦ"],
-							"Lateral fricative" => ["_", "_", "_", "_", "", "", "ɬ", "ɮ", "", "", "", "", "", "", "", "", "", "", "_", "_", "_", "_"],
-							"Approximant" => ["", "", "", "ʋ", "", "", "", "ɹ", "", "", "", "ɻ", "", "j", "", "ɰ", "", "", "", "", "_", "_"],
-							"Lateral approx." => ["_", "_", "_", "_", "", "", "", "l", "", "", "", "ɭ", "", "ʎ", "", "ʟ", "", "", "_", "_", "_", "_"],
-						];
-						echo "<tr><th></th>";
-						foreach ($cols as $col) echo "<th colspan=2>$col</th>";
-						echo "</tr>";
-						foreach ($rows as $row => $chars) {
-							echo "<tr><th>$row</th>";
-							foreach ($chars as $char) {
-								if ($char == "_") echo '<td class="gray"></td>';
-								elseif ($char == "" || strpos($ipa, $char) === false) echo "<td></td>";
-								else echo '<td class="typable" onclick="type(this)">'.$char."</td>";
-							}
-						}
-					?>
-				</table>
-				<a name="vowels"></a>
-				<div id="vowels">
-					<?php
-						$vowelRows = [
-							4 => [1 => "i", 10 => "y", 41 => "ɨ", 50 => "ʉ", 81 => "ɯ", 90 => "u"],
-							18 => [23 => "ɪ", 30 => "ʏ", 71 => "ʊ"],
-							32 => [14 => "e", 24 => "ø", 48 => "ɘ", 57 => "ɵ", 81 => "ɤ", 90 => "o"],
-							45 => [55 => "ə"],
-							59 => [27 => "ɛ", 37 => "œ", 54 => "ɜ", 64 => "ɞ", 81 => "ʌ", 90 => "ɔ"],
-							73 => [34 => "æ", 62 => "ɐ"],
-							87 => [41 => "a", 51 => "ɶ", 81 => "ɑ", 90 => "ɒ"],
-						];
-						foreach ($vowelRows as $y => $vowelRow) {
-							foreach ($vowelRow as $x => $vowel) {
-								if (strpos($ipa, $vowel) !== false)
-									echo '<div class="vowel typable" style="top:'.$y.'%;left:'.$x.'%;" onclick="type(this)">'.$vowel."</div>";
-							}
-						}
-					?>
+				<div class="tab-content">
+					<div id="consonants-vowels" class="tab-pane in active">
+						<table id="consonants">
+							<thead><?php
+								$ipa = implode("", readConfigFile("IPA"));
+								$consonantCols = ["Bilabial", "Labio-<br>dental", "Dental", "Alveolar", "Post-<br>alveolar", "Retro-<br>flex", "Palatal", "Velar", "Uvular", "Pharyn-<br>geal", "Glottal"];
+								$consonantRows = [
+									"Plosive" => ["p", "b", "", "", "", "", "t", "d", "", "", "ʈ", "ɖ", "c", "ɟ", "k", "ɡ", "q", "ɢ", "", "_", "ʔ", "_"],
+									"Nasal" => ["", "m", "", "ɱ", "", "", "", "n", "", "", "", "ɳ", "", "ɲ", "", "ŋ", "", "ɴ", "_", "_", "_", "_"],
+									"Trill" => ["", "ʙ", "", "", "", "", "", "r", "", "", "", "", "", "", "_", "_", "", "ʀ", "", "", "_", "_"],
+									"Tap or Flap" => ["", "", "", "ⱱ", "", "", "", "ɾ", "", "", "", "ɽ", "", "", "_", "_", "", "", "", "", "_", "_"],
+									"Fricative" => ["ɸ", "β", "f", "v", "θ", "ð", "s", "z", "ʃ", "ʒ", "ʂ", "ʐ", "ç", "ʝ", "x", "ɣ", "χ", "ʁ", "ħ", "ʕ", "h", "ɦ"],
+									"Lateral fricative" => ["_", "_", "_", "_", "", "", "ɬ", "ɮ", "", "", "", "", "", "", "", "", "", "", "_", "_", "_", "_"],
+									"Approximant" => ["", "", "", "ʋ", "", "", "", "ɹ", "", "", "", "ɻ", "", "j", "", "ɰ", "", "", "", "", "_", "_"],
+									"Lateral approx." => ["_", "_", "_", "_", "", "", "", "l", "", "", "", "ɭ", "", "ʎ", "", "ʟ", "", "", "_", "_", "_", "_"],
+								];
+								echo "<tr><th></th>";
+								foreach ($consonantCols as $col) echo "<th colspan=2>$col</th>";
+								echo "</tr></thead><tbody>";
+								foreach ($consonantRows as $row => $chars) {
+									echo "<tr><th>$row</th>";
+									foreach ($chars as $char) {
+										if ($char == "_") echo '<td class="gray"></td>';
+										elseif ($char == "" || strpos($ipa, $char) === false) echo "<td></td>";
+										else echo '<td class="typable" onclick="type(this)">'.$char."</td>";
+									}
+								}
+							?></tbody>
+						</table>
+						<a name="vowels"></a>
+						<div id="vowels">
+							<?php
+								$vowelRows = [
+									4 => [1 => "i", 10 => "y", 41 => "ɨ", 50 => "ʉ", 81 => "ɯ", 90 => "u"],
+									18 => [23 => "ɪ", 30 => "ʏ", 71 => "ʊ"],
+									32 => [14 => "e", 24 => "ø", 48 => "ɘ", 57 => "ɵ", 81 => "ɤ", 90 => "o"],
+									45 => [55 => "ə"],
+									59 => [27 => "ɛ", 37 => "œ", 54 => "ɜ", 64 => "ɞ", 81 => "ʌ", 90 => "ɔ"],
+									73 => [34 => "æ", 62 => "ɐ"],
+									87 => [41 => "a", 51 => "ɶ", 81 => "ɑ", 90 => "ɒ"],
+								];
+								foreach ($vowelRows as $y => $vowelRow) {
+									foreach ($vowelRow as $x => $vowel) {
+										if (strpos($ipa, $vowel) !== false)
+											echo '<div class="vowel typable" style="top:'.$y.'%;left:'.$x.'%;" onclick="type(this)">'.$vowel."</div>";
+									}
+								}
+							?>
+						</div>
+					</div>
+					<div id="diacritics" class="tab-pane">
+						<table>
+							<thead>
+								<tr><th colspan=2>Suprasegmentals</th></tr>
+							</thead>
+							<tbody>
+								<?php
+									$BASE = "◌";
+									// [symbol, name, if base is needed]
+									$suprasegmentals = [
+										["ˈ", "Primary stress", false],
+										["ˌ", "Secondary stress", false],
+										["ː", "Long", false],
+										["ˑ", "Half-long", false],
+										["̆", "Extra short", true],
+										["|", "Minor (foot) group", false],
+										["‖", "Major (intonation) group", false],
+										[".", "Syllable break", false],
+										["‿", "Linking (absence of a break)", false],
+									];
+									foreach ($suprasegmentals as $char) {
+										echo '<tr><td class="typable" onclick="typeRaw(\''.$char[0].'\')">' . ($char[2]?$BASE:"") . $char[0] . "</td><td>" . $char[1] . "</td></tr>";
+									}
+								?>
+							</tbody>
+						</table>
+					</div>
+					<div id="tones-accents" class="tab-pane">
+						<table>
+							<thead>
+								<tr><th colspan=6>Tones and Word Accents</th></tr>
+								<tr><th colspan=3>Level</th><th colspan=3>Contour</th></tr>
+							</thead>
+							<tbody>
+								<?php
+									// [diacritic symbol (optional), non-diacritic symbol, name]
+									$tones = [
+										["̋", "˥", "Extra high"],
+										["̌", "˩˥", "Falling"],
+										["́", "˦", "High"],
+										["̂", "˥˩", "Falling"],
+										["̄", "˧", "Mid"],
+										["᷄", "˦˥", "High rising"],
+										["̀", "˨", "Low"],
+										["᷅", "˩˨", "Low rising"],
+										["̏", "˩", "Extra low"],
+										["᷈", "˧˦˧", "Rising-falling"],
+										[null, "↓", "Downstep"],
+										[null, "↗", "Global rise"],
+										[null, "↑", "Upstep"],
+										[null, "↘", "Global fall"],
+									];
+									foreach ($tones as $i => $tone) {
+										if ($i%2 == 0) echo "<tr>"; 
+										if ($tone[0] == null) echo "<td></td>";
+										else echo '<td class="typable" onclick="typeRaw(\''.$tone[0].'\')">' . $BASE.$tone[0] . "</td>";
+										echo '<td class="typable" onclick="type(this)">' . $tone[1] . "</td><td>" . $tone[2] . "</td>";
+										if ($i%2 == 1) echo "</tr>";
+									}
+								?>
+							</tbody>
+						</table>
+					</div>
+					<div id="other" class="tab-pane">
+						<table>
+							<thead>
+								<tr><th colspan=4>Non-Pulmonic Consonants</th></tr>
+								<tr><th colspan=2>Clicks</th><th colspan=2>Voiced Implosives</th></tr>
+							</thead>
+							<tbody>
+								<?php
+									// [symbol, name]
+									$otherConsonants = [
+										["ʘ", "Bilabial"], ["ɓ", "Bilabial"],
+										["ǀ", "Dental"], ["ɗ", "Dental/alveolar"],
+										["ǃ", "[Post]alveolar"], ["ʄ", "Palatal"],
+										["ǂ", "Palatoalveolar"], ["ɠ", "Velar"],
+										["ǁ", "Alveolar lateral"], ["ʛ", "Uvular"],
+									];
+									foreach ($otherConsonants as $i => $char) {
+										if ($i%2 == 0) echo "<tr>"; 
+										echo '<td class="typable" onclick="type(this)">' . $char[0] . "</td><td>" . $char[1] . "</td>";
+										if ($i%2 == 1) echo "</tr>";
+									}
+								?>
+								<tr><td colspan=4 style="border:none">&nbsp;</td></tr>
+								<tr><td class="typable" onclick="type(this)">ʼ</td><th style="text-align:center" colspan=3>Ejective</th></tr>
+							</tbody>
+						</table>
+						<a href="https://westonruter.github.io/ipa-chart/keyboard/" target="_blank">Check here if the symbol you need is missing</a>
+					</div>
 				</div>
 			</div>
 		</div>
