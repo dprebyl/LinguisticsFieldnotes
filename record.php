@@ -34,6 +34,10 @@
 				overflow-x: auto;
 				text-align: center;
 				line-height: 16px;
+				pointer-events: none;
+			}
+			#ipa .nav-tabs li, #ipa .tab-content {
+				pointer-events: auto;
 			}
 			#ipa .nav-tabs li:first-child {
 				margin-left: 10px;
@@ -46,8 +50,9 @@
 				height: 235px;
 				overflow-y: hidden;
 			}
-			#consonants, #vowels {
+			#ipa table, #vowels {
 				display: inline-block;
+				vertical-align: top;
 			}
 			#ipa table {
 				margin-bottom: 2px;
@@ -430,6 +435,13 @@
 					<div id="diacritics" class="tab-pane">
 						<table>
 							<thead>
+								<tr colspan=20><th>Diacritics</th></tr>
+							</thead>
+							<tbody>
+							</tbody>
+						</table>
+						<table>
+							<thead>
 								<tr><th colspan=2>Suprasegmentals</th></tr>
 							</thead>
 							<tbody>
@@ -516,7 +528,16 @@
 								<tr><td class="typable" onclick="type(this)">ʼ</td><th style="text-align:center" colspan=3>Ejective</th></tr>
 							</tbody>
 						</table>
-						<a href="https://westonruter.github.io/ipa-chart/keyboard/" target="_blank">Check here if the symbol you need is missing</a>
+						<table>
+							<thead>
+								<tr><th colspan=2>Other Symbols</th></tr>
+							</thead>
+							<tbody>
+								<?php
+								?>
+							</tbody>
+						</table>
+						<br><a href="https://westonruter.github.io/ipa-chart/keyboard/" target="_blank">Check here if the symbol you need is missing</a>
 					</div>
 				</div>
 			</div>
