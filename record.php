@@ -1,6 +1,19 @@
 <?php
 	require("config.php");
 	requireLogin();
+	
+	// Used to create the clickable symbols in all charts besides vowels
+	function typableTd($symbol, $name = "", $baseNeeded = false) {
+		if ($symbol == "") return "<td colspan=2></td>"; // Filler for empty cell on chart
+		// Add this to if to require symbol to be in IPA.txt (will not handle main consonant chart correctly):  || strpos($ipa, $char) === false
+		return '<td class="typable" onclick="type(\'' . $symbol . '\')">'
+			. ($baseNeeded ? "◌" : "") . $symbol . "</td>"
+			. ($name != "" ? "<td>$name</td>" : "");
+	}
+
+	$ipa = implode("", readConfigFile("IPA"));
+	$orthography = readConfigFile("Orthography");
+	$languageName = readConfigFile("LanguageName")[0];
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -39,7 +52,7 @@
 			#ipa .nav-tabs li, #ipa .tab-content {
 				pointer-events: auto;
 			}
-			#ipa .nav-tabs li:first-child {
+			#ipa .nav-tabs li:first-child { /* Spacing before first tab */
 				margin-left: 10px;
 			}
 			#ipa .nav-tabs > li:not(.active) > a {
@@ -96,9 +109,16 @@
 				width: 20px;
 				text-align: center;
 			}
-			.vowel {
+			.typable.vowel {
 				position: absolute;
 				background: white;
+			}
+			.typable.orthography {
+				font-size: 32px;
+				line-height: 32px;
+				width: 32px;
+				display: inline-block;
+				margin: 4px;
 			}
 		</style>
 		<script type="text/javascript">
@@ -270,13 +290,9 @@
 			}
 			
 			// When a button is pressed on the IPA input
-			function type(el) {
-				typeRaw(el.innerText);
-			}
-			
-			function typeRaw(text) {
+			function type(symbol) {
 				if (ipaElement == undefined) ipaElement = document.getElementById("foreign");
-				ipaElement.value += text;
+				ipaElement.value += symbol;
 				ipaElement.focus();
 			}
 		</script>
@@ -311,7 +327,7 @@
 						<hr>
 						<div id="editor">
 							<div class="form-group">
-								<label class="control-label col-md-2" for="foreign"><?=readConfigFile("LanguageName")[0]?>:</label>
+								<label class="control-label col-md-2" for="foreign"><?=$languageName?>:</label>
 								<div class="col-md-10">
 									<div class="input-group">
 										<input type="text" class="form-control" id="foreign" onfocus="setIpaInput(this)">
@@ -377,16 +393,28 @@
 		<div class="hidden" id="ipa-spacer">
 			<div id="ipa">
 				<ul class="nav nav-tabs">
-					<li class="active"><a data-toggle="tab" href="#consonants-vowels">Consonants/Vowels</a></li>
+					<?php if (count($orthography) > 0): ?>
+						<li class="active"><a data-toggle="tab" href="#orthography"><?=$languageName?> Orthography</a></li>
+						<li>
+					<?php else: ?>
+						<li class="active">
+					<?php endif; ?>
+					<a data-toggle="tab" href="#consonants-vowels">Consonants/Vowels</a></li>
 					<li><a data-toggle="tab" href="#diacritics">Diacritics</a></li>
-					<li><a data-toggle="tab" href="#tones-accents">Tones/Accents</a></li>
-					<li><a data-toggle="tab" href="#other">Other</a></li>
+					<li><a data-toggle="tab" href="#other">Tones/Accents/Other</a></li>
 				</ul>
 				<div class="tab-content">
-					<div id="consonants-vowels" class="tab-pane in active">
+					<div id="orthography" class="tab-pane<?php if (count($orthography) > 0) echo " in active"; ?>">
+						<?php
+							foreach ($orthography as $char) {
+								echo '<div class="typable orthography" onclick="type(\''.$char.'\')">'.$char."</div>";
+							}
+						?>
+					</div>
+					<div id="consonants-vowels" class="tab-pane<?php if (count($orthography) == 0) echo " in active"; ?>">
 						<table id="consonants">
 							<thead><?php
-								$ipa = implode("", readConfigFile("IPA"));
+								
 								$consonantCols = ["Bilabial", "Labio-<br>dental", "Dental", "Alveolar", "Post-<br>alveolar", "Retro-<br>flex", "Palatal", "Velar", "Uvular", "Pharyn-<br>geal", "Glottal"];
 								$consonantRows = [
 									"Plosive" => ["p", "b", "", "", "", "", "t", "d", "", "", "ʈ", "ɖ", "c", "ɟ", "k", "ɡ", "q", "ɢ", "", "_", "ʔ", "_"],
@@ -406,7 +434,7 @@
 									foreach ($chars as $char) {
 										if ($char == "_") echo '<td class="gray"></td>';
 										elseif ($char == "" || strpos($ipa, $char) === false) echo "<td></td>";
-										else echo '<td class="typable" onclick="type(this)">'.$char."</td>";
+										else echo typableTd($char, "", false);
 									}
 								}
 							?></tbody>
@@ -426,7 +454,7 @@
 								foreach ($vowelRows as $y => $vowelRow) {
 									foreach ($vowelRow as $x => $vowel) {
 										if (strpos($ipa, $vowel) !== false)
-											echo '<div class="vowel typable" style="top:'.$y.'%;left:'.$x.'%;" onclick="type(this)">'.$vowel."</div>";
+											echo '<div class="vowel typable" style="top:'.$y.'%;left:'.$x.'%;" onclick="type(\''.$vowel.'\')">'.$vowel."</div>";
 									}
 								}
 							?>
@@ -435,9 +463,31 @@
 					<div id="diacritics" class="tab-pane">
 						<table>
 							<thead>
-								<tr colspan=20><th>Diacritics</th></tr>
+								<tr><th colspan=8>Diacritics</th></tr>
 							</thead>
 							<tbody>
+								<?php
+									
+									
+									// [symbol, name, if base needed]
+									$diacritics = [
+										["̥", "Voiceless", true],		["̩", "Syllabic", true],			["ˤ", "Pharyngealized", false],				["̃", "Nasalized", true],		
+										["̬", "Voiced", true],			["̯", "Non-syllabic", true],		["̴", "Velarized or pharyngealized", true],	["ⁿ", "Nasal release", false],
+										["ʰ", "Aspirated", false],		["˞", "Rhoticity", false],		["̝", "Raised", true], 						["ˡ", "Lateral release", false],
+										["̹", "More rounded", true],		["̤", "Breathy voiced", true],	["̞", "Lowered", true],						["̚", "No audible release", true],
+										["̜", "Less rounded", true],		["̰", "Creaky voiced", true],	["̘", "Advanced Tongue Root", true], 		["", "", false],
+										["̟", "Advanced", true],			["̼", "Linguolabial", true],		["̙", "Retracted Tongue Root", true],		["", "", false],
+										["̠", "Retracted", true],		["ʷ", "Labalized", false],		["̪", "Dental", true],						["", "", false],
+										["̈", "Centralized", true],		["ʲ", "Palatalized", false],	["̺", "Apical", true],						["͡", "Tie bar (above)", true],
+										["̽", "Mid-centralized", true],	["ˠ", "Velarized", false],		["̻", "Laminal", true],						["͜", "Tie bar (below)", true],
+									];
+									
+									foreach ($diacritics as $i => $char) {
+										if ($i%4 == 0) echo "<tr>";
+										echo typableTd($char[0], $char[1], $char[2]);
+										if ($i%4 == 3) echo "</tr>";
+									}
+								?>
 							</tbody>
 						</table>
 						<table>
@@ -446,7 +496,6 @@
 							</thead>
 							<tbody>
 								<?php
-									$BASE = "◌";
 									// [symbol, name, if base is needed]
 									$suprasegmentals = [
 										["ˈ", "Primary stress", false],
@@ -460,43 +509,9 @@
 										["‿", "Linking (absence of a break)", false],
 									];
 									foreach ($suprasegmentals as $char) {
-										echo '<tr><td class="typable" onclick="typeRaw(\''.$char[0].'\')">' . ($char[2]?$BASE:"") . $char[0] . "</td><td>" . $char[1] . "</td></tr>";
-									}
-								?>
-							</tbody>
-						</table>
-					</div>
-					<div id="tones-accents" class="tab-pane">
-						<table>
-							<thead>
-								<tr><th colspan=6>Tones and Word Accents</th></tr>
-								<tr><th colspan=3>Level</th><th colspan=3>Contour</th></tr>
-							</thead>
-							<tbody>
-								<?php
-									// [diacritic symbol (optional), non-diacritic symbol, name]
-									$tones = [
-										["̋", "˥", "Extra high"],
-										["̌", "˩˥", "Falling"],
-										["́", "˦", "High"],
-										["̂", "˥˩", "Falling"],
-										["̄", "˧", "Mid"],
-										["᷄", "˦˥", "High rising"],
-										["̀", "˨", "Low"],
-										["᷅", "˩˨", "Low rising"],
-										["̏", "˩", "Extra low"],
-										["᷈", "˧˦˧", "Rising-falling"],
-										[null, "↓", "Downstep"],
-										[null, "↗", "Global rise"],
-										[null, "↑", "Upstep"],
-										[null, "↘", "Global fall"],
-									];
-									foreach ($tones as $i => $tone) {
-										if ($i%2 == 0) echo "<tr>"; 
-										if ($tone[0] == null) echo "<td></td>";
-										else echo '<td class="typable" onclick="typeRaw(\''.$tone[0].'\')">' . $BASE.$tone[0] . "</td>";
-										echo '<td class="typable" onclick="type(this)">' . $tone[1] . "</td><td>" . $tone[2] . "</td>";
-										if ($i%2 == 1) echo "</tr>";
+										echo "<tr>";
+										echo typableTd($char[0], $char[1], $char[2]);
+										echo "</tr>";
 									}
 								?>
 							</tbody>
@@ -514,26 +529,74 @@
 									$otherConsonants = [
 										["ʘ", "Bilabial"], ["ɓ", "Bilabial"],
 										["ǀ", "Dental"], ["ɗ", "Dental/alveolar"],
-										["ǃ", "[Post]alveolar"], ["ʄ", "Palatal"],
+										["ǃ", "(Post)alveolar"], ["ʄ", "Palatal"],
 										["ǂ", "Palatoalveolar"], ["ɠ", "Velar"],
 										["ǁ", "Alveolar lateral"], ["ʛ", "Uvular"],
 									];
 									foreach ($otherConsonants as $i => $char) {
 										if ($i%2 == 0) echo "<tr>"; 
-										echo '<td class="typable" onclick="type(this)">' . $char[0] . "</td><td>" . $char[1] . "</td>";
+										echo typableTd($char[0], $char[1], false);
 										if ($i%2 == 1) echo "</tr>";
 									}
 								?>
 								<tr><td colspan=4 style="border:none">&nbsp;</td></tr>
-								<tr><td class="typable" onclick="type(this)">ʼ</td><th style="text-align:center" colspan=3>Ejective</th></tr>
+								<tr><td class="typable" onclick="type('ʼ')">ʼ</td><th style="text-align:center" colspan=3>Ejective</th></tr>
 							</tbody>
 						</table>
 						<table>
 							<thead>
-								<tr><th colspan=2>Other Symbols</th></tr>
+								<tr><th colspan=6>Tones and Word Accents</th></tr>
+								<tr><th colspan=3>Level</th><th colspan=3>Contour</th></tr>
 							</thead>
 							<tbody>
 								<?php
+									// [diacritic symbol (optional), non-diacritic symbol, name]
+									$tones = [
+										["̋", "˥", "Extra high"],
+										["̌", "˩˥", "Rising"],
+										["́", "˦", "High"],
+										["̂", "˥˩", "Falling"],
+										["̄", "˧", "Mid"],
+										["᷄", "˦˥", "High rising"],
+										["̀", "˨", "Low"],
+										["᷅", "˩˨", "Low rising"],
+										["̏", "˩", "Extra low"],
+										["᷈", "˧˦˧", "Rising-falling"],
+										[null, "↓", "Downstep"],
+										[null, "↗", "Global rise"],
+										[null, "↑", "Upstep"],
+										[null, "↘", "Global fall"],
+									];
+									foreach ($tones as $i => $char) {
+										if ($i%2 == 0) echo "<tr>"; 
+										if ($char[0] == null) echo "<td></td>";
+										else echo typableTd($char[0], "", true);
+										echo typableTd($char[1], $char[2], false);
+										if ($i%2 == 1) echo "</tr>";
+									}
+								?>
+							</tbody>
+						</table>
+						<table>
+							<thead>
+								<tr><th colspan=4>Other Symbols</th></tr>
+							</thead>
+							<tbody>
+								<?php
+									// [symbol, name]
+									$otherSymbols = [
+										["ʍ", "Voiceless labial-velar fricative"],	["ɕ", "Voiceless alveolo-palatal fricative"],
+										["w", "Voiced labial-velar approximant"],	["ʑ", "Voiced alveol-palatal fricative"],
+										["ɥ", "Voiced labial-palatal approximant"],	["ɺ", "Alveolar lateral flap"],
+										["ʜ", "Voiceless epiglottal fricative"],	["ɧ", "Simultaneous ʃ and x"],
+										["ʢ", "Voiced epiglottal fricative"],		["", ""],
+										["ʡ", "Epiglottal plosive"],				["", ""],
+									];
+									foreach ($otherSymbols as $i => $char) {
+										if ($i%2 == 0) echo "<tr>"; 
+										echo typableTd($char[0], $char[1], false);
+										if ($i%2 == 1) echo "</tr>";
+									}
 								?>
 							</tbody>
 						</table>
