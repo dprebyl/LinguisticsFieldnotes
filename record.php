@@ -29,11 +29,22 @@
 		
 		<style type="text/css">
 			.top-spacing { margin-top: 15px; }
-			.list-group-item > div > div {
+			#entry-list {
+				max-height: calc(100vh - 90px);
+				overflow-y: auto;
+			}
+			#entry-list .list-group-item > div > div {
 				overflow: hidden; 
 				text-overflow: ellipsis; 
 				white-space: nowrap;
 			}
+			#entry-list .list-group-item.hide-if-siblings {
+				display: none;
+			}
+			#entry-list .list-group-item.hide-if-siblings:only-child {
+				display: block;
+			}
+			/* All remaining CSS is related to special character input */
 			#ipa-spacer {
 				height: 270px;
 			}
@@ -146,6 +157,13 @@
 				if (entries == null) entries = [];
 				for (var i = 0; i < entries.length; i++) {
 					entryList.appendChild(drawListEntry(entries[i], i));
+				}
+				if (entries.length == 0) {
+					var listItem = document.createElement("a");
+					listItem.className = "list-group-item hide-if-siblings";
+					listItem.href = "javascript:void(0)";
+					listItem.innerText = "Entries you add will be listed here. Click on them to edit or delete. Once all entries for the session have been added, click submit.";
+					entryList.appendChild(listItem);
 				}
 			}
 			
