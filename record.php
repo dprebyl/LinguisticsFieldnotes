@@ -196,8 +196,26 @@
 				return entry;
 			}
 			
+			// Ensure an entry is valid before creating or saving changes
+			function validEntry() {
+				var good = true;
+				for (var i = 0; i < 2; i++) { // Only first two boxes required
+					var el = document.getElementById(ENTRY_INPUTS[i]);
+					if (el.value == "") {
+						el.parentNode.classList.add("has-error");
+						good = false;
+					}
+				}
+				if (!good) { // User needs to input something
+					$("#entry-error-modal").modal();
+				}
+				return good;
+			}
+			
 			// User adds a new entry to the list
 			function createEntry() {
+				if (!validEntry()) return;
+				
 				// Read inputs from user and add to local storage
 				var entry = getUserEntry();
 				entries.push(entry);
@@ -242,6 +260,8 @@
 			
 			// User saves changes to entry being edited
 			function saveEdit() {
+				if (!validEntry()) return;
+				
 				entries[editNum] = getUserEntry();
 				saveEntries();
 				
@@ -284,7 +304,7 @@
 					data[GLOBAL_INPUTS[i]] = el.value;
 				}
 				if (!good) { // User needs to input something
-					$("#error-modal").modal();
+					$("#submission-error-modal").modal();
 				} else { // Submit
 					var el = document.getElementById("submission-data");
 					el.value = JSON.stringify(data);
@@ -351,7 +371,7 @@
 								<label class="control-label col-md-2" for="foreign"><?=$languageName?>:</label>
 								<div class="col-md-10">
 									<div class="input-group">
-										<input type="text" class="form-control" id="foreign" onfocus="setIpaInput(this)">
+										<input type="text" class="form-control" id="foreign" onfocus="setIpaInput(this)" oninput="this.parentNode.classList.remove('has-error')">
 										<div class="input-group-btn">
 											<button type="button" class="btn btn-default" tabindex="-1" title="Enter IPA symbols" onclick="toggleIpa(this)">
 												<span class="glyphicon glyphicon-pencil"></span>
@@ -363,7 +383,7 @@
 							<div class="form-group">
 								<label class="control-label col-md-2" for="english">Translation:</label>
 								<div class="col-md-10">
-									<input type="text" class="form-control" id="english">
+									<input type="text" class="form-control" id="english" oninput="this.parentNode.classList.remove('has-error')">
 								</div>
 							</div>
 							<div class="form-group">
@@ -627,13 +647,29 @@
 			</div>
 		</div>
 		
-		<!-- Modal for error -->
-		<div class="modal fade" id="error-modal" role="dialog">
+		<!-- Modals for error -->
+		<div class="modal fade" id="entry-error-modal" role="dialog">
 			<div class="modal-dialog">
 				<div class="modal-content">
 					<div class="modal-header">
 						<button type="button" class="close" data-dismiss="modal">&times;</button>
-							<h4 class="modal-title">Incomplete submission</h4>
+						<h4 class="modal-title">Incomplete entry</h4>
+						</div>
+					<div class="modal-body">
+						<p>Please ensure you have entered something for both <?=$languageName?> and Translation.</p>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="modal fade" id="submission-error-modal" role="dialog">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal">&times;</button>
+						<h4 class="modal-title">Incomplete submission</h4>
 						</div>
 					<div class="modal-body">
 						<p>Please ensure you have entered a date, source, topic, and at least one entry.</p>
