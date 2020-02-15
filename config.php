@@ -25,7 +25,7 @@
 		
 		foreach ($lines as $i => $line) {
 			// Remove lines that are empty (only whitespace) or begin with a # (comment)
-			if (ctype_space($line) || $line[0] == "#") {
+			if ($line == "" || ctype_space($line) || $line[0] == "#") {
 				unset($lines[$i]);
 			} else {
 				// Remove undesired characters

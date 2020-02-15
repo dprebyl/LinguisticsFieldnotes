@@ -58,10 +58,13 @@
 			#ipa .nav-tabs > li:not(.active) > a {
 				background: #ddd;
 			}
-			#ipa .tab-content {
+			#ipa .tab-pane {
 				background: white;
 				height: 235px;
 				overflow-y: hidden;
+			}
+			#ipa .tab-pane#orthography {
+				height: 44px;
 			}
 			#ipa table, #vowels {
 				display: inline-block;
