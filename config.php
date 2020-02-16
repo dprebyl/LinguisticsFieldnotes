@@ -1,6 +1,6 @@
 <?php
 	define("CONFIG_DIR", "../OneDriveSync/Configuration");
-	define("PROJECT_FILE", "../OneDriveSync/TurkmenFieldnotes-Spring2020.txt");
+	define("PROJECT_FILE_DIR", "../OneDriveSync");
 	define("BACKUP_DIR", "../OneDriveSync/Backups"); // Set to false to disable
 
 	function requireLogin() {

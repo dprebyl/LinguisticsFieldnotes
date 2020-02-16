@@ -2,7 +2,10 @@
 	require("config.php");
 	requireLogin();
 
-	$FILE = "TurkmenFieldnotes-Spring2020.txt";
+	// Determine the file name based on language and semester/year
+	$month = intval(date("n"));
+	$semester = ($month <= 5 ? "Spring" : ($month <= 7 ? "Summer" : "Fall"));
+	$FILE = PROJECT_FILE_DIR . "/" . readConfigFile("LanguageName")[0] . "Fieldnotes-" . $semester . date("Y") . ".txt";
 
 	$data = json_decode($_POST["data"], true);	
 	$output = "";
@@ -22,10 +25,10 @@
 	}
 	
 	//echo "<pre>$output</pre>";
-	file_put_contents(PROJECT_FILE, $output, FILE_APPEND | LOCK_EX);
+	file_put_contents($FILE, $output, FILE_APPEND | LOCK_EX);
 	header("Location: submission-received.php");
 	
-	if (PROJECT_FILE !== false) {
-		copy(PROJECT_FILE, BACKUP_DIR . "/" . date("Y-m-d_H.i.s") . ".txt"); // Create a backup
+	if ($FILE !== false) {
+		copy($FILE, BACKUP_DIR . "/" . date("Y-m-d_H.i.s") . ".txt"); // Create a backup
 	}
 ?>
