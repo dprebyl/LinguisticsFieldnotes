@@ -180,7 +180,7 @@
 				listItem.id = "entry" + num;
 				listItem.onclick = e => toggleEdit(listItem);
 				//listItem.appendChild(document.createTextNode(entry[0] + " | " + entry[1]));
-				listItem.innerHTML = '<div class="row"><div class="col-sm-6">' + entry[0] + '</div><div class="col-sm-6">' + entry[1] + '</div></div>';
+				listItem.innerHTML = '<div class="row"><div class="col-xs-6">' + entry[0] + '</div><div class="col-xs-6">' + entry[1] + '</div></div>';
 				return listItem;
 			}
 			
@@ -393,16 +393,16 @@
 							  </div>
 							</div>
 							<div class="form-group" id="add-buttons">
-								<div class="col-md-2 pull-right">
-									<button type="button" class="btn btn-success col-md-12" onclick="createEntry()">Add</button>
+								<div class="col-md-3 col-sm-2 col-xs-3 pull-right">
+									<button type="button" class="btn btn-success col-xs-12" onclick="createEntry()">Add</button>
 								</div>
 							</div>
 							<div class="form-group hidden" id="edit-buttons">
-								<div class="col-md-2">
-									<button type="button" class="btn btn-danger col-md-12" onclick="deleteEntry()">Delete</button>
+								<div class="col-md-3 col-sm-2 col-xs-3">
+									<button type="button" class="btn btn-danger col-xs-12" onclick="deleteEntry()">Delete</button>
 								</div>
-								<div class="col-md-2 pull-right">
-									<button type="button" class="btn btn-success col-md-12" onclick="saveEdit()">Save</button>
+								<div class="col-md-3 col-sm-2 col-xs-3 pull-right">
+									<button type="button" class="btn btn-success col-xs-12" onclick="saveEdit()">Save</button>
 								</div>
 							</div>
 						</div>
@@ -421,8 +421,8 @@
 					</div>
 					<form class="form-horizontal">
 						<div class="form-group">
-							<div class="col-md-3 pull-right">
-								<button type="button" class="btn btn-success col-md-12" onclick="attemptSubmit()">Submit</button>
+							<div class="col-md-4 col-sm-2 col-xs-3 pull-right">
+								<button type="button" class="btn btn-success col-xs-12" onclick="attemptSubmit()">Submit</button>
 							</div>
 						</div>
 					</form>
