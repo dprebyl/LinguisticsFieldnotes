@@ -1,11 +1,10 @@
 <?php
 	// Configuration file stored one directory above web root
-	$config = @file_get_contents($_SERVER['DOCUMENT_ROOT'] . "/../FieldnotesConfig.json");
+	$config = parse_ini_file($_SERVER['DOCUMENT_ROOT'] . "/../FieldnotesConfig.ini");
 	if ($config === false) {
 		header("HTTP/1.1 500 Internal Server Error");
 		exit;
 	}
-	$config = json_decode($config, true);
 	foreach (["CONFIG_DIR", "PROJECT_FILE_DIR", "BACKUP_DIR"] as $dir) {
 		if (array_key_exists($dir, $config)) {
 			define($dir, $config[$dir]);
