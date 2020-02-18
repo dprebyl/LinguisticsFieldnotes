@@ -348,6 +348,7 @@
 							<label class="control-label col-md-2" for="date">Date:</label>
 							<div class="col-md-10">
 								<input type="date" class="form-control" id="date" oninput="storeGlobal(this)">
+								<!-- placeholder="Date of recording" onfocus="this.type='date'" onblur="if(this.value=='')this.type='text'" -->
 							</div>
 						</div>
 						<div class="form-group">
