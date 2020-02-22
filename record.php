@@ -5,13 +5,11 @@
 	// Used to create the clickable symbols in all charts besides vowels
 	function typableTd($symbol, $name = "", $baseNeeded = false) {
 		if ($symbol == "") return "<td colspan=2></td>"; // Filler for empty cell on chart
-		// Add this to if to require symbol to be in IPA.txt (will not handle main consonant chart correctly):  || strpos($ipa, $char) === false
 		return '<td class="typable" onclick="type(\'' . $symbol . '\')">'
 			. ($baseNeeded ? "◌" : "") . $symbol . "</td>"
 			. ($name != "" ? "<td>$name</td>" : "");
 	}
 
-	$ipa = implode("", readConfigFile("IPA"));
 	$orthography = readConfigFile("Orthography");
 	$languageName = readConfigFile("LanguageName")[0];
 ?>
@@ -475,7 +473,7 @@
 									echo "<tr><th>$row</th>";
 									foreach ($chars as $char) {
 										if ($char == "_") echo '<td class="gray"></td>';
-										elseif ($char == "" || strpos($ipa, $char) === false) echo "<td></td>";
+										elseif ($char == "") echo "<td></td>";
 										else echo typableTd($char, "", false);
 									}
 								}
@@ -495,8 +493,7 @@
 								];
 								foreach ($vowelRows as $y => $vowelRow) {
 									foreach ($vowelRow as $x => $vowel) {
-										if (strpos($ipa, $vowel) !== false)
-											echo '<div class="vowel typable" style="top:'.$y.'%;left:'.$x.'%;" onclick="type(\''.$vowel.'\')">'.$vowel."</div>";
+										echo '<div class="vowel typable" style="top:'.$y.'%;left:'.$x.'%;" onclick="type(\''.$vowel.'\')">'.$vowel."</div>";
 									}
 								}
 							?>
