@@ -1,3 +1,4 @@
+<?php session_start(); ?>
 <!DOCTYPE html>
 <html lang="en">
 	<head>
@@ -34,7 +35,7 @@
 						</div>
 						<button type="submit" class="btn btn-primary">Login</button>
 					</form>
-					<?php session_start(); if (isset($_SESSION["approved"]) && $_SESSION["approved"] == false): ?>
+					<?php if (isset($_SESSION["approved"]) && $_SESSION["approved"] == false): ?>
 					<div class="alert alert-danger">
 						<strong>Student ID not approved.</strong> Contact your professor for assistance.
 					</div>
