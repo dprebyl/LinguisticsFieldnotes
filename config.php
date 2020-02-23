@@ -1,17 +1,10 @@
 <?php
 	// Configuration file stored one directory above web root
 	$config = parse_ini_file($_SERVER['DOCUMENT_ROOT'] . "/../FieldnotesConfig.ini");
-	if ($config === false) {
-		header("HTTP/1.1 500 Internal Server Error");
-		exit;
-	}
+	if ($config === false) http500();
 	foreach (["CONFIG_DIR", "PROJECT_FILE_DIR", "BACKUP_DIR"] as $dir) {
-		if (array_key_exists($dir, $config)) {
-			define($dir, $config[$dir]);
-		} else {
-			header("HTTP/1.1 500 Internal Server Error");
-			exit;
-		}
+		if (!array_key_exists($dir, $config)) http500();
+		define($dir, $config[$dir]);
 	}
 
 	function requireLogin() {
@@ -32,7 +25,9 @@
 	
 	// Returns a config file as an array of lines
 	function readConfigFile($file) {
-		$lines = explode("\n", file_get_contents(CONFIG_DIR . "/" . $file . ".txt"));
+		$file = file_get_contents(CONFIG_DIR . "/" . $file . ".txt");
+		if ($file === false) http500();
+		$lines = explode("\n", $file);
 		
 		foreach ($lines as $i => $line) {
 			// Remove lines that are empty (only whitespace) or begin with a # (comment)
@@ -44,5 +39,10 @@
 			}
 		}
 		return array_values($lines);
+	}
+	
+	function http500() {
+		header("HTTP/1.1 500 Internal Server Error");
+		exit;
 	}
 ?>

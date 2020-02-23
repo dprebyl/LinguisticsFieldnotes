@@ -4,6 +4,7 @@
 	
 	$orthography = readConfigFile("Orthography");
 	$languageName = readConfigFile("LanguageName")[0];
+	$annotations = getAnnotations();
 	
 	// Used to create the clickable symbols in all charts besides vowels
 	function typableTd($symbol, $name = "", $baseNeeded = false) {
@@ -503,7 +504,7 @@
 					<div class="panel-group">
 						<div class="panel panel-info">
 							<div class="panel-heading">Annotations</div>
-							<div class="panel-body"><?=getAnnotations()?></div>
+							<div class="panel-body"><?=$annotations?></div>
 						</div>
 					</div>
 					<p>Tip: For fast entry, press tab to move between textboxes and enter to add/save the current entry.</p>
