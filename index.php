@@ -30,14 +30,14 @@
 					<h1>Fieldnotes login</h1>
 					<form class="form-inline" method="POST" action="login.php">
 						<div class="form-group">
-							<label class="control-label" for="student-id">Student ID:</label>
+							<label class="control-label" for="student-id">KU Username:</label>
 							<input type="text" class="form-control" id="student-id" name="student-id">
 						</div>
 						<button type="submit" class="btn btn-primary">Login</button>
 					</form>
 					<?php if (isset($_SESSION["approved"]) && $_SESSION["approved"] == false): ?>
 					<div class="alert alert-danger">
-						<strong>Student ID not approved.</strong> Contact your professor for assistance.
+						<strong>KU username not approved.</strong> Contact your professor for assistance.
 					</div>
 					<?php endif; ?>
 				</div>
