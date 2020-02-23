@@ -2,6 +2,9 @@
 	require("config.php");
 	requireLogin();
 	
+	$orthography = readConfigFile("Orthography");
+	$languageName = readConfigFile("LanguageName")[0];
+	
 	// Used to create the clickable symbols in all charts besides vowels
 	function typableTd($symbol, $name = "", $baseNeeded = false) {
 		if ($symbol == "") return "<td colspan=2></td>"; // Filler for empty cell on chart
@@ -9,9 +12,97 @@
 			. ($baseNeeded ? "◌" : "") . $symbol . "</td>"
 			. ($name != "" ? "<td>$name</td>" : "");
 	}
-
-	$orthography = readConfigFile("Orthography");
-	$languageName = readConfigFile("LanguageName")[0];
+	
+	// Checks to see if $symbol is in $orthography. Returns it's orthography symbol if so, and false if not.
+	function orthographySymbol($symbol) {
+		global $orthography;
+		foreach ($orthography as $orthEntry) {
+			$orthEntry = explode("=", $orthEntry);
+			if (count($orthEntry) != 2) continue; // Skip invalid $orthEntry
+			if ($orthEntry[0] == $symbol) return $orthEntry[1];
+		}
+		return false; // Symbol not in $orthography
+	}
+	
+	// === Data to generate IPA input tabs ====================================
+	
+	$consonantCols = ["Bilabial", "Labio-<br>dental", "Dental", "Alveolar", "Post-<br>alveolar", "Retro-<br>flex", "Palatal", "Velar", "Uvular", "Pharyn-<br>geal", "Glottal"];
+	$consonantRows = [
+		"Plosive" => ["p", "b", "", "", "", "", "t", "d", "", "", "ʈ", "ɖ", "c", "ɟ", "k", "ɡ", "q", "ɢ", "", "_", "ʔ", "_"],
+		"Nasal" => ["", "m", "", "ɱ", "", "", "", "n", "", "", "", "ɳ", "", "ɲ", "", "ŋ", "", "ɴ", "_", "_", "_", "_"],
+		"Trill" => ["", "ʙ", "", "", "", "", "", "r", "", "", "", "", "", "", "_", "_", "", "ʀ", "", "", "_", "_"],
+		"Tap or Flap" => ["", "", "", "ⱱ", "", "", "", "ɾ", "", "", "", "ɽ", "", "", "_", "_", "", "", "", "", "_", "_"],
+		"Fricative" => ["ɸ", "β", "f", "v", "θ", "ð", "s", "z", "ʃ", "ʒ", "ʂ", "ʐ", "ç", "ʝ", "x", "ɣ", "χ", "ʁ", "ħ", "ʕ", "h", "ɦ"],
+		"Lateral fricative" => ["_", "_", "_", "_", "", "", "ɬ", "ɮ", "", "", "", "", "", "", "", "", "", "", "_", "_", "_", "_"],
+		"Approximant" => ["", "", "", "ʋ", "", "", "", "ɹ", "", "", "", "ɻ", "", "j", "", "ɰ", "", "", "", "", "_", "_"],
+		"Lateral approx." => ["_", "_", "_", "_", "", "", "", "l", "", "", "", "ɭ", "", "ʎ", "", "ʟ", "", "", "_", "_", "_", "_"],
+	];
+	
+	$vowelRows = [
+		4 => [1 => "i", 10 => "y", 41 => "ɨ", 50 => "ʉ", 81 => "ɯ", 90 => "u"],
+		18 => [23 => "ɪ", 30 => "ʏ", 71 => "ʊ"],
+		32 => [14 => "e", 24 => "ø", 48 => "ɘ", 57 => "ɵ", 81 => "ɤ", 90 => "o"],
+		45 => [55 => "ə"],
+		59 => [27 => "ɛ", 37 => "œ", 54 => "ɜ", 64 => "ɞ", 81 => "ʌ", 90 => "ɔ"],
+		73 => [34 => "æ", 62 => "ɐ"],
+		87 => [41 => "a", 51 => "ɶ", 81 => "ɑ", 90 => "ɒ"],
+	];
+	
+	// [symbol, name, if base needed]
+	$diacritics = [
+		["̥", "Voiceless", true],		["̩", "Syllabic", true],			["ˤ", "Pharyngealized", false],				["̃", "Nasalized", true],		
+		["̬", "Voiced", true],			["̯", "Non-syllabic", true],		["̴", "Velarized or pharyngealized", true],	["ⁿ", "Nasal release", false],
+		["ʰ", "Aspirated", false],		["˞", "Rhoticity", false],		["̝", "Raised", true], 						["ˡ", "Lateral release", false],
+		["̹", "More rounded", true],		["̤", "Breathy voiced", true],	["̞", "Lowered", true],						["̚", "No audible release", true],
+		["̜", "Less rounded", true],		["̰", "Creaky voiced", true],	["̘", "Advanced Tongue Root", true], 		["", "", false],
+		["̟", "Advanced", true],			["̼", "Linguolabial", true],		["̙", "Retracted Tongue Root", true],		["", "", false],
+		["̠", "Retracted", true],		["ʷ", "Labalized", false],		["̪", "Dental", true],						["", "", false],
+		["̈", "Centralized", true],		["ʲ", "Palatalized", false],	["̺", "Apical", true],						["͡", "Tie bar (above)", true],
+		["̽", "Mid-centralized", true],	["ˠ", "Velarized", false],		["̻", "Laminal", true],						["͜", "Tie bar (below)", true],
+	];
+	
+	// [symbol, name, if base is needed]
+	$suprasegmentals = [
+		["ˈ", "Primary stress", false],
+		["ˌ", "Secondary stress", false],
+		["ː", "Long", false],
+		["ˑ", "Half-long", false],
+		["̆", "Extra short", true],
+		["|", "Minor (foot) group", false],
+		["‖", "Major (intonation) group", false],
+		[".", "Syllable break", false],
+		["‿", "Linking (absence of a break)", false],
+	];
+	
+	// [symbol, name]
+	$otherConsonants = [
+		["ʘ", "Bilabial"], ["ɓ", "Bilabial"],
+		["ǀ", "Dental"], ["ɗ", "Dental/alveolar"],
+		["ǃ", "(Post)alveolar"], ["ʄ", "Palatal"],
+		["ǂ", "Palatoalveolar"], ["ɠ", "Velar"],
+		["ǁ", "Alveolar lateral"], ["ʛ", "Uvular"],
+	];
+	
+	// [diacritic symbol (optional), non-diacritic symbol, name]
+	$tones = [
+		["̋", "˥", "Extra high"],	["̌", "˩˥", "Rising"],
+		["́", "˦", "High"],			["̂", "˥˩", "Falling"],
+		["̄", "˧", "Mid"],			["᷄", "˦˥", "High rising"],
+		["̀", "˨", "Low"],			["᷅", "˩˨", "Low rising"],
+		["̏", "˩", "Extra low"],		["᷈", "˧˦˧", "Rising-falling"],
+		[null, "↓", "Downstep"],	[null, "↗", "Global rise"],
+		[null, "↑", "Upstep"],		[null, "↘", "Global fall"],
+	];
+	
+	// [symbol, name]
+	$otherSymbols = [
+		["ʍ", "Voiceless labial-velar fricative"],	["ɕ", "Voiceless alveolo-palatal fricative"],
+		["w", "Voiced labial-velar approximant"],	["ʑ", "Voiced alveol-palatal fricative"],
+		["ɥ", "Voiced labial-palatal approximant"],	["ɺ", "Alveolar lateral flap"],
+		["ʜ", "Voiceless epiglottal fricative"],	["ɧ", "Simultaneous ʃ and x"],
+		["ʢ", "Voiced epiglottal fricative"],		["", ""],
+		["ʡ", "Epiglottal plosive"],				["", ""],
+	];
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -72,10 +163,7 @@
 				height: 235px;
 				overflow-y: hidden;
 			}
-			#ipa .tab-pane#orthography {
-				height: 44px;
-			}
-			#ipa table, #vowels {
+			#ipa table, .vowels {
 				display: inline-block;
 				vertical-align: top;
 			}
@@ -94,6 +182,9 @@
 				line-height: 16px;
 				text-align: center;
 			}
+			#ipa table td {
+				height: 22px;
+			}
 			#ipa table td.typable {
 				font-size: 20px;
 				text-align: center;
@@ -106,7 +197,7 @@
 			#ipa .gray {
 				background: gray;
 			}
-			#vowels {
+			.vowels {
 				position: relative;
 				background-image: url(vowels.svg);
 				background-size: contain;
@@ -125,12 +216,15 @@
 				position: absolute;
 				background: white;
 			}
-			.typable.orthography {
-				font-size: 32px;
-				line-height: 32px;
-				width: 32px;
+			#orthographyOther {
 				display: inline-block;
-				margin: 4px;
+				width: 40px;
+				height: 100%;
+				white-space: normal;
+				text-align: center;
+			}
+			.typable.orthography {
+				margin: 2px auto;
 			}
 		</style>
 		<script type="text/javascript">
@@ -445,27 +539,8 @@
 				</ul>
 				<div class="tab-content">
 					<div id="orthography" class="tab-pane<?php if (count($orthography) > 0) echo " in active"; ?>">
-						<?php
-							foreach ($orthography as $char) {
-								echo '<div class="typable orthography" onclick="type(\''.$char.'\')">'.$char."</div>";
-							}
-						?>
-					</div>
-					<div id="consonants-vowels" class="tab-pane<?php if (count($orthography) == 0) echo " in active"; ?>">
-						<table id="consonants">
+						<table>
 							<thead><?php
-								
-								$consonantCols = ["Bilabial", "Labio-<br>dental", "Dental", "Alveolar", "Post-<br>alveolar", "Retro-<br>flex", "Palatal", "Velar", "Uvular", "Pharyn-<br>geal", "Glottal"];
-								$consonantRows = [
-									"Plosive" => ["p", "b", "", "", "", "", "t", "d", "", "", "ʈ", "ɖ", "c", "ɟ", "k", "ɡ", "q", "ɢ", "", "_", "ʔ", "_"],
-									"Nasal" => ["", "m", "", "ɱ", "", "", "", "n", "", "", "", "ɳ", "", "ɲ", "", "ŋ", "", "ɴ", "_", "_", "_", "_"],
-									"Trill" => ["", "ʙ", "", "", "", "", "", "r", "", "", "", "", "", "", "_", "_", "", "ʀ", "", "", "_", "_"],
-									"Tap or Flap" => ["", "", "", "ⱱ", "", "", "", "ɾ", "", "", "", "ɽ", "", "", "_", "_", "", "", "", "", "_", "_"],
-									"Fricative" => ["ɸ", "β", "f", "v", "θ", "ð", "s", "z", "ʃ", "ʒ", "ʂ", "ʐ", "ç", "ʝ", "x", "ɣ", "χ", "ʁ", "ħ", "ʕ", "h", "ɦ"],
-									"Lateral fricative" => ["_", "_", "_", "_", "", "", "ɬ", "ɮ", "", "", "", "", "", "", "", "", "", "", "_", "_", "_", "_"],
-									"Approximant" => ["", "", "", "ʋ", "", "", "", "ɹ", "", "", "", "ɻ", "", "j", "", "ɰ", "", "", "", "", "_", "_"],
-									"Lateral approx." => ["_", "_", "_", "_", "", "", "", "l", "", "", "", "ɭ", "", "ʎ", "", "ʟ", "", "", "_", "_", "_", "_"],
-								];
 								echo "<tr><th></th>";
 								foreach ($consonantCols as $col) echo "<th colspan=2>$col</th>";
 								echo "</tr></thead><tbody>";
@@ -473,24 +548,56 @@
 									echo "<tr><th>$row</th>";
 									foreach ($chars as $char) {
 										if ($char == "_") echo '<td class="gray"></td>';
-										elseif ($char == "") echo "<td></td>";
+										elseif ($char == "") echo "<td></td>"; // Needed because typableTd would create a td with colspan=2
+										else {
+											$orthSymbol = orthographySymbol($char);
+											if ($orthSymbol !== false) echo typableTd($orthSymbol, "", false);
+											else echo "<td></td>"; // Charcter not in orthography
+										}
+									}
+								}
+							?></tbody>
+						</table>
+						<div class="vowels">
+							<?php
+								foreach ($vowelRows as $y => $vowelRow) {
+									foreach ($vowelRow as $x => $vowel) {
+										$orthSymbol = orthographySymbol($vowel);
+										if ($orthSymbol !== false) echo '<div class="vowel typable" style="top:'.$y.'%;left:'.$x.'%;" onclick="type(\''.$orthSymbol.'\')">'.$orthSymbol."</div>";
+										else echo "<td></td>"; // Charcter not in orthography
+									}
+								}
+							?>
+						</div>
+						<div id="orthographyOther">
+						Other
+						<?php
+							foreach ($orthography as $orthEntry) {
+								$orthEntry = explode("=", $orthEntry);
+								if (count($orthEntry) != 2) continue; // Skip invalid $orthEntry
+								if ($orthEntry[0] == "_") echo '<div class="typable orthography" onclick="type(\''.$orthEntry[1].'\')">'.$orthEntry[1]."</div>";
+							}
+						?>
+						</div>
+					</div>
+					<div id="consonants-vowels" class="tab-pane<?php if (count($orthography) == 0) echo " in active"; ?>">
+						<table>
+							<thead><?php
+								echo "<tr><th></th>";
+								foreach ($consonantCols as $col) echo "<th colspan=2>$col</th>";
+								echo "</tr></thead><tbody>";
+								foreach ($consonantRows as $row => $chars) {
+									echo "<tr><th>$row</th>";
+									foreach ($chars as $char) {
+										if ($char == "_") echo '<td class="gray"></td>';
+										elseif ($char == "") echo "<td></td>"; // Needed because typableTd would create a td with colspan=2
 										else echo typableTd($char, "", false);
 									}
 								}
 							?></tbody>
 						</table>
-						<a name="vowels"></a>
-						<div id="vowels">
+						<div class="vowels">
 							<?php
-								$vowelRows = [
-									4 => [1 => "i", 10 => "y", 41 => "ɨ", 50 => "ʉ", 81 => "ɯ", 90 => "u"],
-									18 => [23 => "ɪ", 30 => "ʏ", 71 => "ʊ"],
-									32 => [14 => "e", 24 => "ø", 48 => "ɘ", 57 => "ɵ", 81 => "ɤ", 90 => "o"],
-									45 => [55 => "ə"],
-									59 => [27 => "ɛ", 37 => "œ", 54 => "ɜ", 64 => "ɞ", 81 => "ʌ", 90 => "ɔ"],
-									73 => [34 => "æ", 62 => "ɐ"],
-									87 => [41 => "a", 51 => "ɶ", 81 => "ɑ", 90 => "ɒ"],
-								];
 								foreach ($vowelRows as $y => $vowelRow) {
 									foreach ($vowelRow as $x => $vowel) {
 										echo '<div class="vowel typable" style="top:'.$y.'%;left:'.$x.'%;" onclick="type(\''.$vowel.'\')">'.$vowel."</div>";
@@ -506,21 +613,6 @@
 							</thead>
 							<tbody>
 								<?php
-									
-									
-									// [symbol, name, if base needed]
-									$diacritics = [
-										["̥", "Voiceless", true],		["̩", "Syllabic", true],			["ˤ", "Pharyngealized", false],				["̃", "Nasalized", true],		
-										["̬", "Voiced", true],			["̯", "Non-syllabic", true],		["̴", "Velarized or pharyngealized", true],	["ⁿ", "Nasal release", false],
-										["ʰ", "Aspirated", false],		["˞", "Rhoticity", false],		["̝", "Raised", true], 						["ˡ", "Lateral release", false],
-										["̹", "More rounded", true],		["̤", "Breathy voiced", true],	["̞", "Lowered", true],						["̚", "No audible release", true],
-										["̜", "Less rounded", true],		["̰", "Creaky voiced", true],	["̘", "Advanced Tongue Root", true], 		["", "", false],
-										["̟", "Advanced", true],			["̼", "Linguolabial", true],		["̙", "Retracted Tongue Root", true],		["", "", false],
-										["̠", "Retracted", true],		["ʷ", "Labalized", false],		["̪", "Dental", true],						["", "", false],
-										["̈", "Centralized", true],		["ʲ", "Palatalized", false],	["̺", "Apical", true],						["͡", "Tie bar (above)", true],
-										["̽", "Mid-centralized", true],	["ˠ", "Velarized", false],		["̻", "Laminal", true],						["͜", "Tie bar (below)", true],
-									];
-									
 									foreach ($diacritics as $i => $char) {
 										if ($i%4 == 0) echo "<tr>";
 										echo typableTd($char[0], $char[1], $char[2]);
@@ -535,18 +627,6 @@
 							</thead>
 							<tbody>
 								<?php
-									// [symbol, name, if base is needed]
-									$suprasegmentals = [
-										["ˈ", "Primary stress", false],
-										["ˌ", "Secondary stress", false],
-										["ː", "Long", false],
-										["ˑ", "Half-long", false],
-										["̆", "Extra short", true],
-										["|", "Minor (foot) group", false],
-										["‖", "Major (intonation) group", false],
-										[".", "Syllable break", false],
-										["‿", "Linking (absence of a break)", false],
-									];
 									foreach ($suprasegmentals as $char) {
 										echo "<tr>";
 										echo typableTd($char[0], $char[1], $char[2]);
@@ -564,14 +644,6 @@
 							</thead>
 							<tbody>
 								<?php
-									// [symbol, name]
-									$otherConsonants = [
-										["ʘ", "Bilabial"], ["ɓ", "Bilabial"],
-										["ǀ", "Dental"], ["ɗ", "Dental/alveolar"],
-										["ǃ", "(Post)alveolar"], ["ʄ", "Palatal"],
-										["ǂ", "Palatoalveolar"], ["ɠ", "Velar"],
-										["ǁ", "Alveolar lateral"], ["ʛ", "Uvular"],
-									];
 									foreach ($otherConsonants as $i => $char) {
 										if ($i%2 == 0) echo "<tr>"; 
 										echo typableTd($char[0], $char[1], false);
@@ -589,23 +661,6 @@
 							</thead>
 							<tbody>
 								<?php
-									// [diacritic symbol (optional), non-diacritic symbol, name]
-									$tones = [
-										["̋", "˥", "Extra high"],
-										["̌", "˩˥", "Rising"],
-										["́", "˦", "High"],
-										["̂", "˥˩", "Falling"],
-										["̄", "˧", "Mid"],
-										["᷄", "˦˥", "High rising"],
-										["̀", "˨", "Low"],
-										["᷅", "˩˨", "Low rising"],
-										["̏", "˩", "Extra low"],
-										["᷈", "˧˦˧", "Rising-falling"],
-										[null, "↓", "Downstep"],
-										[null, "↗", "Global rise"],
-										[null, "↑", "Upstep"],
-										[null, "↘", "Global fall"],
-									];
 									foreach ($tones as $i => $char) {
 										if ($i%2 == 0) echo "<tr>"; 
 										if ($char[0] == null) echo "<td></td>";
@@ -622,15 +677,6 @@
 							</thead>
 							<tbody>
 								<?php
-									// [symbol, name]
-									$otherSymbols = [
-										["ʍ", "Voiceless labial-velar fricative"],	["ɕ", "Voiceless alveolo-palatal fricative"],
-										["w", "Voiced labial-velar approximant"],	["ʑ", "Voiced alveol-palatal fricative"],
-										["ɥ", "Voiced labial-palatal approximant"],	["ɺ", "Alveolar lateral flap"],
-										["ʜ", "Voiceless epiglottal fricative"],	["ɧ", "Simultaneous ʃ and x"],
-										["ʢ", "Voiced epiglottal fricative"],		["", ""],
-										["ʡ", "Epiglottal plosive"],				["", ""],
-									];
 									foreach ($otherSymbols as $i => $char) {
 										if ($i%2 == 0) echo "<tr>"; 
 										echo typableTd($char[0], $char[1], false);
