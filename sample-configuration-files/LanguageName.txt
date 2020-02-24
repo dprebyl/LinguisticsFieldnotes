@@ -1,0 +1,5 @@
+# The name of the language shown on throughout the app.
+# Crucially, this is also used to determine the name of the fieldnotes file to edit based on the following format:
+# LanguageFieldnotes-SemesterYear.txt
+# Semester is determined by the current month (spring, summer or fall)
+Turkmen

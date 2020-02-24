@@ -1,0 +1,56 @@
+# Enter any symbols required for the orthography but not found on a keyboard in this file, one per line
+# If there are no symbols in this file, the orthography tab will be hidden
+# Symbols should be in the format IPASymbol=OrthographySymbol without any quotes or spaces
+# Empty lines and lines beginning with # are ignored
+
+###### CONSONANTS ######
+
+p=p
+b=b
+t=t
+d=d
+k=k
+g=g
+
+m=m
+n=n
+ŋ=ng
+
+r=r
+
+θ=s
+ð=z
+ʃ=š
+ʒ=ž
+h=h
+
+# TODO: Affricates
+
+ɬ=l
+
+j=y
+
+###### VOWELS ######
+
+i=i
+y=ü
+
+ɯ=y
+u=u
+
+ɛ=e
+œ=ö
+
+ɔ=o
+
+æ=ä
+
+ɑ=a
+
+###### OTHER SYMBOLS ######
+# Other symbols should be listed as _=OrthographySymbol=Description using an underscore instead of an IPASymbol
+# Both equals signs are required, but the description itself can be empty
+
+_=č=Voiceless postalveolar affricate
+_=ǰ=Voiced postalveolar affricate
+_=w=Voiced labial-velar approximant

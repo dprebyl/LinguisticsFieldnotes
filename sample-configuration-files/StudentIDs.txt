@@ -1,0 +1,6 @@
+# Enter student IDs approved to login, one per line
+# Empty lines and lines beginning with # are ignored
+# These are essentially just valid passwords, you could also enter usernames or a shared class password
+# Passwords cannot contain spaces
+123456
+000000

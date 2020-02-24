@@ -1,0 +1,4 @@
+# Enter the text you wish to display in the "Annotations" box visible while students are recording field notes
+# Empty lines and lines beginning with # are ignored
+
+$MP$ is for "minimal pair"
