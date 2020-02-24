@@ -39,6 +39,7 @@
 		"Lateral approx." => ["_", "_", "_", "_", "", "", "", "l", "", "", "", "ɭ", "", "ʎ", "", "ʟ", "", "", "_", "_", "_", "_"],
 	];
 	
+	// y% => [x% => "symbol", ...]
 	$vowelRows = [
 		4 => [1 => "i", 10 => "y", 41 => "ɨ", 50 => "ʉ", 81 => "ɯ", 90 => "u"],
 		18 => [23 => "ɪ", 30 => "ʏ", 71 => "ʊ"],
@@ -77,11 +78,11 @@
 	
 	// [symbol, name]
 	$otherConsonants = [
-		["ʘ", "Bilabial"], ["ɓ", "Bilabial"],
-		["ǀ", "Dental"], ["ɗ", "Dental/alveolar"],
-		["ǃ", "(Post)alveolar"], ["ʄ", "Palatal"],
-		["ǂ", "Palatoalveolar"], ["ɠ", "Velar"],
-		["ǁ", "Alveolar lateral"], ["ʛ", "Uvular"],
+		["ʘ", "Bilabial"],			["ɓ", "Bilabial"],
+		["ǀ", "Dental"],			["ɗ", "Dental/alveolar"],
+		["ǃ", "(Post)alveolar"],	["ʄ", "Palatal"],
+		["ǂ", "Palatoalveolar"],	["ɠ", "Velar"],
+		["ǁ", "Alveolar lateral"],	["ʛ", "Uvular"],
 	];
 	
 	// [diacritic symbol (optional), non-diacritic symbol, name]
@@ -216,16 +217,6 @@
 			.typable.vowel {
 				position: absolute;
 				background: white;
-			}
-			#orthographyOther {
-				display: inline-block;
-				width: 40px;
-				height: 100%;
-				white-space: normal;
-				text-align: center;
-			}
-			.typable.orthography {
-				margin: 2px auto;
 			}
 		</style>
 		<script type="text/javascript">
@@ -563,22 +554,27 @@
 								foreach ($vowelRows as $y => $vowelRow) {
 									foreach ($vowelRow as $x => $vowel) {
 										$orthSymbol = orthographySymbol($vowel);
-										if ($orthSymbol !== false) echo '<div class="vowel typable" style="top:'.$y.'%;left:'.$x.'%;" onclick="type(\''.$orthSymbol.'\')">'.$orthSymbol."</div>";
+										if ($orthSymbol !== false) 
+											echo '<div class="vowel typable" style="top:'.$y.'%;left:'.$x.'%;" onclick="type(\''.$orthSymbol.'\')">'.$orthSymbol."</div>";
 										else echo "<td></td>"; // Charcter not in orthography
 									}
 								}
 							?>
 						</div>
-						<div id="orthographyOther">
-						Other
-						<?php
-							foreach ($orthography as $orthEntry) {
-								$orthEntry = explode("=", $orthEntry);
-								if (count($orthEntry) != 2) continue; // Skip invalid $orthEntry
-								if ($orthEntry[0] == "_") echo '<div class="typable orthography" onclick="type(\''.$orthEntry[1].'\')">'.$orthEntry[1]."</div>";
-							}
-						?>
-						</div>
+						<table>
+							<thead>
+								<tr><th colspan=2>Other</th></tr>
+							</thead>
+							<tbody>
+								<?php
+									foreach ($orthography as $orthEntry) {
+										$orthEntry = explode("=", $orthEntry);
+										if (count($orthEntry) >= 3 && $orthEntry[0] == "_") // If it's an "other" symbol
+											echo "<tr>" . typableTd($orthEntry[1], $orthEntry[2], false) . "</tr>";
+									}
+								?>
+							</tbody>
+						</table>
 					</div>
 					<div id="consonants-vowels" class="tab-pane<?php if (count($orthography) == 0) echo " in active"; ?>">
 						<table>
@@ -628,9 +624,7 @@
 							<tbody>
 								<?php
 									foreach ($suprasegmentals as $char) {
-										echo "<tr>";
-										echo typableTd($char[0], $char[1], $char[2]);
-										echo "</tr>";
+										echo "<tr>" . typableTd($char[0], $char[1], $char[2]) . "</tr>";
 									}
 								?>
 							</tbody>
