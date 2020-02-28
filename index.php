@@ -36,9 +36,14 @@
 						<button type="submit" class="btn btn-primary">Login</button>
 					</form>
 					<?php if (isset($_SESSION["approved"]) && $_SESSION["approved"] == false): ?>
-					<div class="alert alert-danger">
-						<strong>KU username not approved.</strong> Contact your professor for assistance.
-					</div>
+						<div class="alert alert-danger">
+							<strong>KU username not approved.</strong> Contact your professor for assistance.
+						</div>
+					<?php elseif (isset($_SESSION["timedout"]) && $_SESSION["timedout"] == true): 
+						$_SESSION["timedout"] = false; ?>
+						<div class="alert alert-info">
+							<strong>Login timed out.</strong> Please log back in to continue adding entries and/or submit.
+						</div>
 					<?php endif; ?>
 				</div>
 			</div>

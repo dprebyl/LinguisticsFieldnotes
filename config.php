@@ -9,7 +9,8 @@
 
 	function requireLogin() {
 		session_start();
-		if (!isset($_SESSION["approved"]) || $_SESSION["approved"] != true) {
+		if (!isset($_SESSION["approved"]) || $_SESSION["approved"] !== true) {
+			$_SESSION["timedout"] = true;
 			header("Location: ./");
 			exit;
 		}

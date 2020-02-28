@@ -2,6 +2,8 @@
 	require("config.php");
 	
 	session_start();
+	$_SESSION["timedout"] = false;
+	
 	$id = $_POST["student-id"];
 	
 	if (verifyId($id)) {
