@@ -24,11 +24,11 @@
 		$output .= "\n";
 	}
 	
-	//echo "<pre>$output</pre>";
+	$_SESSION["submission"] = $output;
 	file_put_contents($FILE, $output, FILE_APPEND | LOCK_EX);
 	header("Location: submission-received.php");
 	
-	if ($FILE !== false) {
+	if ($FILE !== false && BACKUP_DIR !== false) {
 		copy($FILE, BACKUP_DIR . "/" . date("Y-m-d_H.i.s") . ".txt"); // Create a backup
 	}
 ?>
