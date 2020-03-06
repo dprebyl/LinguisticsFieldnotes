@@ -489,8 +489,8 @@
 								</select>
 							</div>
 							<div class="col-md-10" style="display:none">
-								<audio id="recording" class="col-xs-10 col-md-11" controls controlslist="nodownload"></audio>
-								<button type="button" class="btn btn-default col-xs-2 col-md-1" tabindex="-1" title="Select different audio file" onclick="unsetAudio()">
+								<audio id="recording" class="col-xs-11" controls controlslist="nodownload"></audio>
+								<button type="button" class="btn btn-default col-xs-1" tabindex="-1" title="Select different audio file" onclick="unsetAudio()">
 									<span class="glyphicon glyphicon-remove"></span>
 								</button>
 							</div>
