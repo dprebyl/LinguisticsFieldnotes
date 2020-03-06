@@ -229,6 +229,20 @@
 			var entries = [];
 			var editNum = -1;
 			
+			// Setup global inputs
+			window.addEventListener("DOMContentLoaded", function() {
+				for (var i = 0; i < GLOBAL_INPUTS.length; i++) {
+					document.getElementById(GLOBAL_INPUTS[i]).value = localStorage.getItem(GLOBAL_INPUTS[i]);
+				}
+				// Special handling for audio select - may be duplicate values if two recordings from same date
+				var select = document.getElementById("date");
+				var fileOption = select.querySelector("[data-file='" + localStorage.getItem("file") + "']");
+				if (fileOption !== null) {
+					select.selectedIndex = fileOption.index;
+					setAudio(select);
+				}
+			});
+			
 			// === Saving/loading entries =====================================
 			
 			// Called when user types in date/source/topic, saves to local storage and removes error if present
@@ -493,9 +507,6 @@
 								<input type="text" class="form-control" id="topic" placeholder="Swadesh list" oninput="storeGlobal(this)">
 							</div>
 						</div>
-						<script>
-							for (var i = 0; i < GLOBAL_INPUTS.length; i++) document.getElementById(GLOBAL_INPUTS[i]).value = localStorage.getItem(GLOBAL_INPUTS[i]);
-						</script>
 						<hr>
 						<div id="editor">
 							<div class="form-group">
