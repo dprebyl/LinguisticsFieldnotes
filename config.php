@@ -2,10 +2,15 @@
 	// Configuration file stored one directory above web root
 	$config = parse_ini_file($_SERVER['DOCUMENT_ROOT'] . "/../FieldnotesConfig.ini");
 	if ($config === false) http500();
-	foreach (["CONFIG_DIR", "PROJECT_FILE_DIR", "BACKUP_DIR"] as $dir) {
+	foreach (["CONFIG_DIR", "PROJECT_FILE_DIR", "BACKUP_DIR", "AUDIO_DIR"] as $dir) {
 		if (!array_key_exists($dir, $config)) http500();
 		define($dir, $config[$dir]);
 	}
+	
+	// Determine the file name based on language and semester/year
+	$month = intval(date("n"));
+	$semester = ($month <= 5 ? "Spring" : ($month <= 7 ? "Summer" : "Fall"));
+	define("FIELDNOTES_FILE", PROJECT_FILE_DIR . "/" . readConfigFile("LanguageName")[0] . "Fieldnotes-" . $semester . date("Y") . ".txt");
 
 	function requireLogin() {
 		session_start();

@@ -120,6 +120,10 @@
 		
 		<style type="text/css">
 			.top-spacing { margin-top: 15px; }
+			#recording {
+				height: 34px;
+				padding: 0;
+			}
 			#entry-list {
 				max-height: calc(100vh - 90px);
 				overflow-y: auto;
@@ -420,6 +424,29 @@
 				ipaElement.value += symbol;
 				ipaElement.focus();
 			}
+			
+			// === Audio ======================================================
+			
+			function setAudio(select) {
+				var file = select.options[select.selectedIndex].dataset.file;
+				localStorage.setItem("date", select.value);
+				localStorage.setItem("file", file);
+				select.parentElement.style.display = "none";
+				var recording = document.getElementById("recording");
+				recording.src = "<?=AUDIO_DIR?>/" + file;
+				recording.parentElement.style.display = "";
+			}
+			
+			function unsetAudio() {
+				localStorage.setItem("date", "");
+				localStorage.setItem("file", "");
+				var recording = document.getElementById("recording");
+				recording.parentElement.style.display = "none";
+				recording.src = "";
+				var select = document.getElementById("date");
+				select.parentElement.style.display = "";
+				select.selectedIndex = 0;
+			}
 		</script>
 	</head>
 	<body>
@@ -429,9 +456,29 @@
 					<form class="form-horizontal" onsubmit="enter()" action="javascript:void(0)">
 						<input type="submit" class="hidden"><!-- Required for enter to submit form -->
 						<div class="form-group">
-							<label class="control-label col-md-2" for="date">Date:</label>
+							<label class="control-label col-md-2" for="date">Recording:</label>
 							<div class="col-md-10">
-								<input type="date" class="form-control" id="date" placeholder="Format like YYYY-MM-DD, ex: <?=date("Y-m-d")?>" oninput="storeGlobal(this)">
+								<select id="date" class="form-control" onchange="setAudio(this)">
+									<option selected disabled value="">Choose a recording...</option>
+									<?php
+										$files = scandir(AUDIO_DIR);
+										foreach ($files as $file) {
+											$extension = substr($file, -4);
+											if ($extension != ".wav" && $extension != ".mp3") continue;
+											$date = date_create_from_format("YMj|", explode("-", $file)[0]);
+											if ($date === false) continue; // Skip invalid files
+											$date = date("Y-m-d", $date->getTimestamp());
+											
+											echo '<option value="'.$date.'" data-file="'.$file.'">'.$file."</option>";
+										}
+									?>
+								</select>
+							</div>
+							<div class="col-md-10" style="display:none">
+								<audio id="recording" class="col-xs-10 col-md-11" controls controlslist="nodownload"></audio>
+								<button type="button" class="btn btn-default col-xs-2 col-md-1" tabindex="-1" title="Select different audio file" onclick="unsetAudio()">
+									<span class="glyphicon glyphicon-remove"></span>
+								</button>
 							</div>
 						</div>
 						<div class="form-group">
@@ -710,7 +757,7 @@
 						<h4 class="modal-title">Incomplete submission</h4>
 						</div>
 					<div class="modal-body">
-						<p>Please ensure you have entered a date, source, topic, and at least one entry.</p>
+						<p>Please ensure you have entered a source, topic, and at least one entry.</p>
 					</div>
 					<div class="modal-footer">
 						<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
