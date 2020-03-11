@@ -475,15 +475,21 @@
 								<select id="date" class="form-control" onchange="setAudio(this)">
 									<option selected disabled value="">Choose a recording...</option>
 									<?php
-										$files = scandir(AUDIO_DIR);
-										foreach ($files as $file) {
+										$rawFiles = scandir(AUDIO_DIR);
+										$files = [];
+										foreach ($rawFiles as $file) {
 											$extension = substr($file, -4);
-											if ($extension != ".wav" && $extension != ".mp3") continue;
+											if ($extension != ".wav" && $extension != ".mp3") continue; // Skip wrong file types
 											$date = date_create_from_format("YMj|", explode("-", $file)[0]);
-											if ($date === false) continue; // Skip invalid files
-											$date = date("Y-m-d", $date->getTimestamp());
-											
-											echo '<option value="'.$date.'" data-file="'.$file.'">'.$file."</option>";
+											if ($date === false) continue; // Skip files with invalid names
+											$date = $date->getTimestamp();
+											array_push($files, [$file, $date]);
+										}
+										// Sort files array by column index 1 which is the date, newest first
+										array_multisort(array_column($files, 1), SORT_DESC, $files);
+										foreach ($files as $file) {
+											echo '<option value="' . date("Y-m-d", $file[1]) . '" data-file="' . $file[0] . '">' 
+												. substr($file[0], 0, -4) . "</option>";
 										}
 									?>
 								</select>
