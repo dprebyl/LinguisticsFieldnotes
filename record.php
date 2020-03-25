@@ -484,7 +484,7 @@
 										$files = [];
 										foreach ($rawFiles as $file) {
 											$extension = substr($file, -4);
-											if ($extension != ".wav" && $extension != ".mp3") continue; // Skip wrong file types
+											if (!in_array($extension, [".wav", ".mp3", ".m4a"])) continue; // Skip wrong file types
 											$date = date_create_from_format("YMj|", explode("-", $file)[0]);
 											if ($date === false) continue; // Skip files with invalid names
 											$date = $date->getTimestamp();
