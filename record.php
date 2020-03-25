@@ -120,7 +120,7 @@
 		
 		<style type="text/css">
 			.top-spacing { margin-top: 15px; }
-			#recording {
+			#player {
 				height: 34px;
 				padding: 0;
 			}
@@ -224,7 +224,7 @@
 			}
 		</style>
 		<script type="text/javascript">
-			const GLOBAL_INPUTS = ["date", "names", "topic"]; // Apply to the whole session
+			const GLOBAL_INPUTS = ["recording", "date", "names", "topic"]; // Apply to the whole session
 			const ENTRY_INPUTS = ["foreign", "english", "comment"]; // Apply to each specific entry
 			var entries = [];
 			var editNum = -1;
@@ -235,12 +235,8 @@
 					document.getElementById(GLOBAL_INPUTS[i]).value = localStorage.getItem(GLOBAL_INPUTS[i]);
 				}
 				// Special handling for audio select - may be duplicate values if two recordings from same date
-				var select = document.getElementById("date");
-				var fileOption = select.querySelector("[data-file='" + localStorage.getItem("file") + "']");
-				if (fileOption !== null) {
-					select.selectedIndex = fileOption.index;
-					setAudio(select);
-				}
+				var recordingInput = document.getElementById("recording");
+				if (recordingInput.value) setAudio(recordingInput);
 			});
 			
 			// === Saving/loading entries =====================================
@@ -397,7 +393,7 @@
 			function attemptSubmit() {
 				var good = entries.length > 0;
 				var data = {entries: entries};
-				for (var i = 0; i < GLOBAL_INPUTS.length; i++) {
+				for (var i = 1; i < GLOBAL_INPUTS.length; i++) { // Skip first input (not required)
 					var el = document.getElementById(GLOBAL_INPUTS[i]);
 					if (el.value == "") {
 						el.parentNode.classList.add("has-error");
@@ -442,24 +438,33 @@
 			// === Audio ======================================================
 			
 			function setAudio(select) {
-				var file = select.options[select.selectedIndex].dataset.file;
-				localStorage.setItem("date", select.value);
-				localStorage.setItem("file", file);
+				storeGlobal(select);
 				select.parentElement.style.display = "none";
-				var recording = document.getElementById("recording");
-				recording.src = "<?=AUDIO_DIR?>/" + file;
-				recording.parentElement.style.display = "";
+				
+				var player = document.getElementById("player");
+				player.src = "<?=AUDIO_DIR?>/" + select.value;
+				player.parentElement.style.display = "";
+				
+				var dateInput = document.getElementById("date");
+				if (dateInput.value == "") {
+					dateInput.value = select.options[select.selectedIndex].dataset.date;
+					storeGlobal(dateInput);
+				}
 			}
 			
 			function unsetAudio() {
-				localStorage.setItem("date", "");
-				localStorage.setItem("file", "");
-				var recording = document.getElementById("recording");
-				recording.parentElement.style.display = "none";
-				recording.src = "";
-				var select = document.getElementById("date");
+				var select = document.getElementById("recording");
 				select.parentElement.style.display = "";
 				select.selectedIndex = 0;
+				storeGlobal(select);
+				
+				var player = document.getElementById("player");
+				player.parentElement.style.display = "none";
+				player.src = "";
+				
+				var dateInput = document.getElementById("date");
+				dateInput.value = "";
+				storeGlobal(dateInput);
 			}
 		</script>
 	</head>
@@ -470,9 +475,9 @@
 					<form class="form-horizontal" onsubmit="enter()" action="javascript:void(0)">
 						<input type="submit" class="hidden"><!-- Required for enter to submit form -->
 						<div class="form-group">
-							<label class="control-label col-md-2" for="date">Recording:</label>
+							<label class="control-label col-md-2" for="recording">Recording:</label>
 							<div class="col-md-10">
-								<select id="date" class="form-control" onchange="setAudio(this)">
+								<select id="recording" class="form-control" onchange="setAudio(this)">
 									<option selected disabled value="">Choose a recording...</option>
 									<?php
 										$rawFiles = scandir(AUDIO_DIR);
@@ -488,17 +493,23 @@
 										// Sort files array by column index 1 which is the date, newest first
 										array_multisort(array_column($files, 1), SORT_DESC, $files);
 										foreach ($files as $file) {
-											echo '<option value="' . date("Y-m-d", $file[1]) . '" data-file="' . $file[0] . '">' 
+											echo '<option value="' . $file[0] . '" data-date="' . date("Y-m-d", $file[1]) . '">' 
 												. substr($file[0], 0, -4) . "</option>";
 										}
 									?>
 								</select>
 							</div>
 							<div class="col-md-10" style="display:none">
-								<audio id="recording" class="col-xs-11" controls controlslist="nodownload"></audio>
+								<audio id="player" class="col-xs-11" controls controlslist="nodownload"></audio>
 								<button type="button" class="btn btn-default col-xs-1" tabindex="-1" title="Select different audio file" onclick="unsetAudio()">
 									<span class="glyphicon glyphicon-remove"></span>
 								</button>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="control-label col-md-2" for="date">Date:</label>
+							<div class="col-md-10">
+								<input type="date" class="form-control" id="date" placeholder="Format like YYYY-MM-DD, ex: <?=date("Y-m-d")?>" oninput="storeGlobal(this)">
 							</div>
 						</div>
 						<div class="form-group">
@@ -774,7 +785,7 @@
 						<h4 class="modal-title">Incomplete submission</h4>
 						</div>
 					<div class="modal-body">
-						<p>Please ensure you have entered a source, topic, and at least one entry.</p>
+						<p>Please ensure you have entered a date, source, topic, and at least one entry.</p>
 					</div>
 					<div class="modal-footer">
 						<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
