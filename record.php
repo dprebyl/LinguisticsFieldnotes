@@ -450,6 +450,8 @@
 					dateInput.value = select.options[select.selectedIndex].dataset.date;
 					storeGlobal(dateInput);
 				}
+				
+				document.getElementById("timestamp-button").classList.remove("hidden");
 			}
 			
 			function unsetAudio() {
@@ -465,6 +467,14 @@
 				var dateInput = document.getElementById("date");
 				dateInput.value = "";
 				storeGlobal(dateInput);
+				
+				document.getElementById("timestamp-button").classList.add("hidden");
+			}
+			
+			function addTimestamp() {
+				document.getElementById("comment").value += "(" 
+					+ document.getElementById("recording").value.slice(0, -4)
+					+ " @ " + Math.floor(document.getElementById("player").currentTime) + "s)";
 			}
 		</script>
 	</head>
@@ -551,17 +561,22 @@
 								<textarea class="form-control" rows="3" id="comment" style="resize:vertical" onkeypress="checkEnter(event)" onfocus="setIpaInput(this)"></textarea>
 							  </div>
 							</div>
-							<div class="form-group" id="add-buttons">
-								<div class="col-md-3 col-sm-2 col-xs-3 pull-right">
-									<button type="button" class="btn btn-success col-xs-12" onclick="createEntry()">Add</button>
+							<div class="form-group">
+								<div id="timestamp-button" class="col-md-3 col-sm-2 col-xs-3 hidden">
+									<button type="button" class="btn btn-default col-xs-12" onclick="addTimestamp()">Timestamp</button>
 								</div>
-							</div>
-							<div class="form-group hidden" id="edit-buttons">
-								<div class="col-md-3 col-sm-2 col-xs-3">
-									<button type="button" class="btn btn-danger col-xs-12" onclick="deleteEntry()">Delete</button>
+								<div id="add-buttons">
+									<div class="col-md-3 col-sm-2 col-xs-3 pull-right">
+										<button type="button" class="btn btn-success col-xs-12" onclick="createEntry()">Add</button>
+									</div>
 								</div>
-								<div class="col-md-3 col-sm-2 col-xs-3 pull-right">
-									<button type="button" class="btn btn-success col-xs-12" onclick="saveEdit()">Save</button>
+								<div id="edit-buttons" class="hidden">
+									<div class="col-md-3 col-sm-2 col-xs-3 pull-right">
+										<button type="button" class="btn btn-success col-xs-12" onclick="saveEdit()">Save</button>
+									</div>
+									<div class="col-md-3 col-sm-2 col-xs-3 pull-right">
+										<button type="button" class="btn btn-danger col-xs-12" onclick="deleteEntry()">Delete</button>
+									</div>
 								</div>
 							</div>
 						</div>
