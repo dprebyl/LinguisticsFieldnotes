@@ -32,11 +32,19 @@
 						<div class="form-group">
 							<label class="control-label" for="student-id">KU Username:</label>
 							<input type="text" class="form-control" id="student-id" name="student-id">
+							<script>
+								document.getElementById("student-id").addEventListener("keypress", function(event) {
+									if (event.keyCode == 13) {
+										event.preventDefault();
+										document.getElementById("default-submit").click();
+									}
+								});
+							</script>
 						</div>
 						<br>
 						<div class="form-group">
 							<button type="submit" name="redirect" value="record-narrative.php" class="btn btn-default">Record Narrative</button>
-							<button type="submit" name="redirect" value="record.php" class="btn btn-primary">Record Fieldnotes</button>
+							<button type="submit" name="redirect" id="default-submit" value="record.php" class="btn btn-primary">Record Fieldnotes</button>
 						</div>
 					</form>
 					<?php if (isset($_SESSION["approved"]) && $_SESSION["approved"] == false): ?>
