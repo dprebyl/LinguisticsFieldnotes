@@ -56,6 +56,8 @@
 			var entries = [];
 			var editNum = -1;
 			
+			var currentNum = 1; // The number for the newest entry
+			
 			// === Saving/loading entries =====================================
 			
 			// Load and display entries from localStorage
@@ -73,6 +75,10 @@
 					listItem.href = "javascript:void(0)";
 					listItem.innerText = "Examples you add will be listed here. Click on them to edit or delete. Once all entries for the session have been added, click submit.";
 					entryList.appendChild(listItem);
+				} else {
+					// Set currentNum to one higher than last recorded entry
+					currentNum = parseInt(entries[entries.length-1][0]) + 1;
+					document.getElementById("number").value = currentNum;
 				}
 			}
 			
@@ -94,13 +100,14 @@
 			
 			// === User creating/editing entries ==============================
 			
-			// Return user's inputs an an array and clears the text boxes
+			// Return user's inputs as an array and clears the text boxes
 			function getUserEntry() {
 				var entry = [];
 				for (var i = 0; i < ENTRY_INPUTS.length; i++) {
 					entry[i] = document.getElementById(ENTRY_INPUTS[i]).value;
 					document.getElementById(ENTRY_INPUTS[i]).value = "";
 				}
+				document.getElementById("number").value = currentNum;
 				return entry;
 			}
 			
@@ -123,6 +130,7 @@
 			// User adds a new entry to the list
 			function createEntry() {
 				if (!validEntry()) return;
+				currentNum = parseInt(document.getElementById("number").value) + 1;
 				
 				// Read inputs from user and add to local storage
 				var entry = getUserEntry();
@@ -145,7 +153,8 @@
 					item.classList.remove("active");
 					editNum = -1;
 					
-					for (var i = 0; i < ENTRY_INPUTS.length; i++) {
+					document.getElementById("number").value = currentNum;
+					for (var i = 1; i < ENTRY_INPUTS.length; i++) {
 						document.getElementById(ENTRY_INPUTS[i]).value = "";
 					}
 					
@@ -201,9 +210,8 @@
 			
 			// Ensure there is at least one entry
 			function attemptSubmit() {
-				var good = entries.length > 0;
 				var data = {entries: entries};
-				if (!good) { // User needs to input something
+				if (entries.length == 0) { // User needs to input something
 					$("#submission-error-modal").modal();
 				} else { // Submit
 					var el = document.getElementById("submission-data");
@@ -255,7 +263,7 @@
 							<div class="form-group">
 								<label class="control-label col-md-2" for="number">Number:</label>
 								<div class="col-md-4">
-									<input type="number" min=1 class="form-control" id="number" oninput="this.parentNode.classList.remove('has-error')">
+									<input type="number" min=1 class="form-control" id="number" value="1" oninput="this.parentNode.classList.remove('has-error')">
 								</div>
 								<label class="control-label col-md-2" for="timestamp">Timestamp:</label>
 								<div class="col-md-4">
