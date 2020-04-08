@@ -27,13 +27,17 @@
 		<div class="container text-center">
 			<div class="panel panel-default">
 				<div class="panel-body">
-					<h1>Fieldnotes login</h1>
+					<h1>Fieldmethods login</h1>
 					<form class="form-inline" method="POST" action="login.php">
 						<div class="form-group">
 							<label class="control-label" for="student-id">KU Username:</label>
 							<input type="text" class="form-control" id="student-id" name="student-id">
 						</div>
-						<button type="submit" class="btn btn-primary">Login</button>
+						<br>
+						<div class="form-group">
+							<button type="submit" name="redirect" value="record-narrative.php" class="btn btn-default">Record Narrative</button>
+							<button type="submit" name="redirect" value="record.php" class="btn btn-primary">Record Fieldnotes</button>
+						</div>
 					</form>
 					<?php if (isset($_SESSION["approved"]) && $_SESSION["approved"] == false): ?>
 						<div class="alert alert-danger">
