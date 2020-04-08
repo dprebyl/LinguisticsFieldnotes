@@ -11,6 +11,9 @@
 	$month = intval(date("n"));
 	$semester = ($month <= 5 ? "Spring" : ($month <= 7 ? "Summer" : "Fall"));
 	define("FIELDNOTES_FILE", PROJECT_FILE_DIR . "/" . readConfigFile("LanguageName")[0] . "Fieldnotes-" . $semester . date("Y") . ".txt");
+	define("NARRATIVE_FILE", PROJECT_FILE_DIR . "/" . readConfigFile("LanguageName")[0] . "Narrative-" . $semester . date("Y") . ".txt");
+	
+	define("NARRATIVE_AUDIO", AUDIO_DIR . "/narrative.wav");
 
 	function requireLogin() {
 		session_start();

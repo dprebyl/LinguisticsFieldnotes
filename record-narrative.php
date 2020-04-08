@@ -247,7 +247,7 @@
 						<input type="submit" class="hidden"><!-- Required for enter to submit form -->
 						<div class="form-group">
 							<div class="col-md-12">
-								<audio id="player" class="col-xs-12" src="<?=AUDIO_DIR?>/narrative.mp3" controls controlslist="nodownload"></audio>
+								<audio id="player" class="col-xs-12" src="<?=NARRATIVE_AUDIO?>" controls controlslist="nodownload"></audio>
 							</div>
 						</div>
 						<hr>
