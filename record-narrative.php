@@ -58,6 +58,14 @@
 			
 			var currentNum = 1; // The number for the newest entry
 			
+			// Setup audio selector
+			window.addEventListener("DOMContentLoaded", function() {
+				var recording = localStorage.getItem("recording");
+				if (recording) {
+					document.getElementById("recording").value = recording;
+					setAudio(document.getElementById("recording"));
+				}
+			});
 			// === Saving/loading entries =====================================
 			
 			// Load and display entries from localStorage
@@ -210,8 +218,8 @@
 			
 			// Ensure there is at least one entry
 			function attemptSubmit() {
-				var data = {entries: entries};
-				if (entries.length == 0) { // User needs to input something
+				var data = {recording: document.getElementById("recording").value, entries: entries};console.log(data);
+				if (entries.length == 0 || data.recording == "") { // User needs to input something
 					$("#submission-error-modal").modal();
 				} else { // Submit
 					var el = document.getElementById("submission-data");
@@ -242,6 +250,26 @@
 			
 			// === Audio ======================================================
 
+			function setAudio(select) {
+				localStorage.setItem("recording", select.value);
+				select.parentElement.style.display = "none";
+				
+				var player = document.getElementById("player");
+				player.src = "<?=AUDIO_DIR?>/" + select.value;
+				player.parentElement.style.display = "";
+			}
+			
+			function unsetAudio() {
+				var select = document.getElementById("recording");
+				select.parentElement.style.display = "";
+				select.selectedIndex = 0;
+				localStorage.setItem("recording", "");
+				
+				var player = document.getElementById("player");
+				player.parentElement.style.display = "none";
+				player.src = "";
+			}
+			
 			function setTimestamp() {
 				document.getElementById("timestamp").value = Math.floor(document.getElementById("player").currentTime) + "s";
 			}
@@ -254,8 +282,27 @@
 					<form class="form-horizontal" onsubmit="enter()" action="javascript:void(0)">
 						<input type="submit" class="hidden"><!-- Required for enter to submit form -->
 						<div class="form-group">
-							<div class="col-md-12">
-								<audio id="player" class="col-xs-12" src="<?=NARRATIVE_AUDIO?>" controls controlslist="nodownload"></audio>
+							<label class="control-label col-md-2" for="recording">Narrative:</label>
+							<div class="col-md-10">
+								<select id="recording" class="form-control" onchange="setAudio(this)">
+									<option selected disabled value="">Choose a narrative...</option>
+									<?php
+										$rawFiles = scandir(AUDIO_DIR);
+										$files = [];
+										foreach ($rawFiles as $file) {
+											$extension = substr($file, -4); // Note: Extension length hard-coded
+											if (!in_array($extension, [".wav", ".mp3", ".m4a"])) continue; // Skip wrong file types
+											if (strtoupper(substr($file, 0, 4)) !== "NARR") continue; // Skip files with invalid names
+											echo '<option value="' . $file . '">' . substr($file, 0, -4) . "</option>";
+										}
+									?>
+								</select>
+							</div>
+							<div class="col-md-10" style="display:none">
+								<audio id="player" class="col-xs-11" controls controlslist="nodownload"></audio>
+								<button type="button" class="btn btn-default col-xs-1" tabindex="-1" title="Select different audio file" onclick="unsetAudio()">
+									<span class="glyphicon glyphicon-remove"></span>
+								</button>
 							</div>
 						</div>
 						<hr>
@@ -331,7 +378,7 @@
 				<div class="modal-content">
 					<div class="modal-header">
 						<button type="button" class="close" data-dismiss="modal">&times;</button>
-						<h4 class="modal-title">Incomplete entry</h4>
+						<h4 class="modal-title">Incomplete example</h4>
 						</div>
 					<div class="modal-body">
 						<p>Please ensure you have entered something in every box (except comments).</p>
@@ -350,7 +397,7 @@
 						<h4 class="modal-title">Incomplete submission</h4>
 						</div>
 					<div class="modal-body">
-						<p>Please ensure you have added at least one example.</p>
+						<p>Please ensure you have selected a narrative and added at least one example.</p>
 					</div>
 					<div class="modal-footer">
 						<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>

@@ -12,11 +12,14 @@
 		$output .= "\n"; // Gap between entrties
 	}
 	
+	$narrative = pathinfo($data["recording"])["filename"];
+	$narrativeFile = PROJECT_FILE_DIR . "/" . $narrative . ".txt";
+	
 	$_SESSION["submission"] = $output;
-	file_put_contents(NARRATIVE_FILE, $output, FILE_APPEND | LOCK_EX);
+	file_put_contents($narrativeFile, $output, FILE_APPEND | LOCK_EX);
 	header("Location: submission-received.php");
 	
-	if (NARRATIVE_FILE !== false && BACKUP_DIR !== false) {
-		copy(NARRATIVE_FILE, BACKUP_DIR . "/" . date("Y-m-d_H.i.s") . "_narrative.txt"); // Create a backup
+	if ($narrativeFile !== false && BACKUP_DIR !== false) {
+		copy($narrativeFile, BACKUP_DIR . "/" . date("Y-m-d_H.i.s") . "_" . $narrative . ".txt"); // Create a backup
 	}
 ?>
