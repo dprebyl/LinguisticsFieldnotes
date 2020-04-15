@@ -310,8 +310,8 @@
 										$rawFiles = scandir(AUDIO_DIR);
 										$files = [];
 										foreach ($rawFiles as $file) {
-											$extension = substr($file, -4);
-											if (!in_array($extension, [".wav", ".mp3", ".m4a"])) continue; // Skip wrong file types
+											$extension = pathinfo($file)["extension"];
+											if (!in_array($extension, AUDIO_EXTENSIONS)) continue; // Skip wrong file types
 											$date = date_create_from_format("YMj|", explode("-", $file)[0]);
 											if ($date === false) continue; // Skip files with invalid names
 											$date = $date->getTimestamp();
@@ -321,7 +321,7 @@
 										array_multisort(array_column($files, 1), SORT_DESC, $files);
 										foreach ($files as $file) {
 											echo '<option value="' . $file[0] . '" data-date="' . date("Y-m-d", $file[1]) . '">' 
-												. substr($file[0], 0, -4) . "</option>";
+												. pathinfo($file[0])["filename"] . "</option>";
 										}
 									?>
 								</select>

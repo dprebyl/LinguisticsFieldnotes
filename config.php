@@ -1,4 +1,6 @@
 <?php
+	const AUDIO_EXTENSIONS = ["mp3", "m4a", "wav"];
+
 	// Configuration file stored one directory above web root
 	$config = parse_ini_file($_SERVER['DOCUMENT_ROOT'] . "/../FieldnotesConfig.ini");
 	if ($config === false) http500();

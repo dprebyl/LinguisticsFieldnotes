@@ -290,10 +290,10 @@
 										$rawFiles = scandir(AUDIO_DIR);
 										$files = [];
 										foreach ($rawFiles as $file) {
-											$extension = substr($file, -4); // Note: Extension length hard-coded
-											if (!in_array($extension, [".wav", ".mp3", ".m4a"])) continue; // Skip wrong file types
+											$extension = pathinfo($file)["extension"];
+											if (!in_array($extension, AUDIO_EXTENSIONS)) continue; // Skip wrong file types
 											if (strtoupper(substr($file, 0, 4)) !== "NARR") continue; // Skip files with invalid names
-											echo '<option value="' . $file . '">' . substr($file, 0, -4) . "</option>";
+											echo '<option value="' . $file . '">' . pathinfo($file)["filename"] . "</option>";
 										}
 									?>
 								</select>
