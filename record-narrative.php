@@ -257,6 +257,9 @@
 				var player = document.getElementById("player");
 				player.src = "<?=AUDIO_DIR?>/" + select.value;
 				player.parentElement.style.display = "";
+				
+				var lastNum = select.options[select.selectedIndex].dataset.lastnum;
+				document.getElementById("number").value = parseInt(lastNum) + 1;
 			}
 			
 			function unsetAudio() {
@@ -293,7 +296,25 @@
 											$extension = pathinfo($file)["extension"];
 											if (!in_array($extension, AUDIO_EXTENSIONS)) continue; // Skip wrong file types
 											if (strtoupper(substr($file, 0, 4)) !== "NARR") continue; // Skip files with invalid names
-											echo '<option value="' . $file . '">' . pathinfo($file)["filename"] . "</option>";
+											
+											// Figure out what number was left off on
+											$notesFile = PROJECT_FILE_DIR . "/" . pathinfo($file)["filename"] . ".txt";
+											if (file_exists($notesFile)) {
+												$notes = file_get_contents($notesFile);
+												$nums = [];
+												// Find every line starting with "(#) [@" where # is a number
+												preg_match_all("/^\(\d+\) \[@/m", $notes, $nums);
+												if (count($nums[0]) == 0) { // No previous entries found
+													$lastNum = 0;
+												} else {
+													// Extract the number from the last line found above
+													$lastNum = (int) substr(end($nums[0]), 1);
+												}
+											} else {
+												$lastNum = 0;
+											}
+											
+											echo '<option value="' . $file . '" data-lastnum="' . $lastNum . '">' . pathinfo($file)["filename"] . "</option>";
 										}
 									?>
 								</select>
