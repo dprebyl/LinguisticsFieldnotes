@@ -8,6 +8,7 @@
 		if (!array_key_exists($dir, $config)) http500();
 		define($dir, $config[$dir]);
 	}
+	define("LOGIN_PROMPT", $config["LOGIN_PROMPT"]);
 	
 	// Determine the file name based on language and semester/year
 	$month = intval(date("n"));

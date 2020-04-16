@@ -1,4 +1,7 @@
-<?php session_start(); ?>
+<?php 
+	require("config.php");
+	session_start();
+?>
 <!DOCTYPE html>
 <html lang="en">
 	<head>
@@ -30,7 +33,7 @@
 					<h1>Fieldmethods login</h1>
 					<form class="form-inline" method="POST" action="login.php">
 						<div class="form-group">
-							<label class="control-label" for="student-id">KU Username:</label>
+							<label class="control-label" for="student-id"><?=LOGIN_PROMPT?>:</label>
 							<input type="text" class="form-control" id="student-id" name="student-id">
 							<script>
 								document.getElementById("student-id").addEventListener("keypress", function(event) {
@@ -49,7 +52,7 @@
 					</form>
 					<?php if (isset($_SESSION["approved"]) && $_SESSION["approved"] == false): ?>
 						<div class="alert alert-danger">
-							<strong>KU username not approved.</strong> Contact your professor for assistance.
+							<strong>Invalid <?=LOGIN_PROMPT?>.</strong> Contact your professor for assistance.
 						</div>
 					<?php elseif (isset($_SESSION["timedout"]) && $_SESSION["timedout"] == true): 
 						$_SESSION["timedout"] = false; ?>
