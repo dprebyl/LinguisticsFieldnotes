@@ -6,7 +6,7 @@ A web application that helps students store fieldnotes from interactions with a 
 ## Features
 * Enter phrases in the consultant's language, their corresponding English translations, and any comments
 * Optionally, listen to audio recordings of the interaction while entering notes and log timestamps
-* Store in-depth examples from a narrative told naturally by the consultant
+* Store examples from narrative told naturally by consultant, with morpheme-by-morpheme glossing
 * Built-in IPA keyboard with diacritics
 * Students can easily copy or download contributions after submitting
 * Entries in progress saved to local storage in case of computer crashes
