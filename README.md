@@ -1,7 +1,7 @@
 # Linguistics Fieldnotes
 A web application that helps students store fieldnotes from interactions with a language consultant for later parsing
 
-![GitHub Logo](/sample-configuration-files/screenshot.png)
+![Example screenshot](/sample-configuration-files/screenshot.png)
 
 ## Features
 * Enter phrases in the consultant's language, their corresponding English translations, and any comments
