@@ -17,7 +17,7 @@ A web application that helps students store fieldnotes from interactions with a 
 2. Place all files in the web root, except for the sample configuration files
 3. Place `FieldnotesConfig.ini` in the directory above the web root
    * If the web root is `~/public_html`, place this file in `~`
-4. Edit FieldnotesConfig.ini to specify the directories you want each type of file stored in
+4. Edit `FieldnotesConfig.ini` to specify the directories you want each type of file stored in
 5. Place the remaining configuration files and recordings in the directories chosen
 
 ## Configuration files
